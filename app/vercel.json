@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "todo-app",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/proxy/:path*"
+    }
+  ]
+}

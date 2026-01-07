@@ -1,0 +1,47 @@
+# Next.js Project Template
+
+This is a basic Next.js project template that can be used as a starting point for new projects.
+
+## Directory Structure
+
+```
+my-nextjs-project/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── globals.css
+│   │   └── ... (other pages)
+│   ├── components/
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   └── ... (other components)
+│   ├── lib/
+│   │   └── utils.ts
+│   ├── hooks/
+│   │   └── useAuth.ts
+│   └── types/
+│       └── index.ts
+├── public/
+│   ├── favicon.ico
+│   └── ... (static assets)
+├── package.json
+├── next.config.js
+├── tsconfig.json
+├── tailwind.config.js
+└── README.md
+```
+
+## Usage
+
+To use this template, copy the directory structure and files to your new project directory.
+
+## Key Features
+
+- App Router (Next.js 13+)
+- TypeScript support
+- Tailwind CSS for styling
+- Environment configuration
+- API routes
+- Component organization
+- Type definitions

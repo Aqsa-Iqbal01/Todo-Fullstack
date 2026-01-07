@@ -1,0 +1,38 @@
+# FastAPI Project Template
+
+This is a basic FastAPI project template that can be used as a starting point for new projects.
+
+## Directory Structure
+
+```
+my-fastapi-project/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       └── endpoints/
+│   │           ├── __init__.py
+│           └── users.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── user.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── user.py
+│   ├── database/
+│   │   ├── __init__.py
+│   │   └── database.py
+│   └── utils/
+│       ├── __init__.py
+│       └── helpers.py
+├── requirements.txt
+├── alembic.ini
+└── README.md
+```
+
+## Usage
+
+To use this template, copy the directory structure and files to your new project directory.

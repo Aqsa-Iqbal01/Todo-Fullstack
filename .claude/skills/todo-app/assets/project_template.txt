@@ -1,0 +1,89 @@
+# Todo App Project Template
+
+This is a full-stack Todo application template that can be used as a starting point for new projects.
+
+## Directory Structure
+
+```
+todo-app/
+├── backend/
+│   ├── main.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── todo.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── todo.py
+│   ├── database/
+│   │   ├── __init__.py
+│   │   └── database.py
+│   ├── auth/
+│   │   ├── __init__.py
+│   │   └── auth.py
+│   └── api/
+│       ├── __init__.py
+│       └── routes/
+│           ├── __init__.py
+│           └── todo.py
+├── app/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   ├── register/
+│   │   │   │   └── page.tsx
+│   │   │   └── dashboard/
+│   │   │       └── page.tsx
+│   │   ├── components/
+│   │   │   ├── TodoList.tsx
+│   │   │   ├── TodoCard.tsx
+│   │   │   ├── TodoModal.tsx
+│   │   │   └── Navbar.tsx
+│   │   ├── lib/
+│   │   │   └── api.ts
+│   │   ├── contexts/
+│   │   │   └── ThemeContext.tsx
+│   │   └── types/
+│   │       └── index.ts
+│   ├── public/
+│   └── package.json
+├── README.md
+└── .env
+```
+
+## Key Features
+
+- Full-stack application with FastAPI backend and Next.js frontend
+- User authentication (login/register)
+- CRUD operations for todos
+- Responsive UI with Tailwind CSS
+- Dark mode support
+- Real-time updates
+- Statistics dashboard
+- Secure token management
+- Proper error handling
+- TypeScript support throughout
+
+## Setup Instructions
+
+### Backend (FastAPI)
+
+1. Navigate to the backend directory: `cd backend`
+2. Create a virtual environment: `python -m venv venv`
+3. Activate the virtual environment:
+   - On Linux/Mac: `source venv/bin/activate`
+   - On Windows: `venv\Scripts\activate`
+4. Install dependencies: `pip install -r requirements.txt`
+5. Run the server: `uvicorn main:app --reload`
+
+### Frontend (Next.js)
+
+1. Navigate to the app directory: `cd app`
+2. Install dependencies: `npm install`
+3. Run the development server: `npm run dev`
+
+The application will be available at:
+- Backend API: http://localhost:8000
+- Frontend: http://localhost:3000
