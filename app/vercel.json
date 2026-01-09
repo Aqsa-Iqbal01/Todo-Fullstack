@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://todo-fullstack-1-psi.vercel.app/api/main/:path*"
+      "destination": "https://aqsa-iqbal-backend.hf.space/api/:path*"
     }
   ]
 }
