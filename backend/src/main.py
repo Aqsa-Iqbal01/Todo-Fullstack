@@ -12,22 +12,30 @@ if os.environ.get("VERCEL_ENV") is None:
 app = FastAPI(title="Todo API", version="1.0.0")
 
 # Configure CORS for production
-frontend_url = os.getenv("FRONTEND_URL", "*")  # Set this in your Vercel environment variables
+frontend_url = os.getenv("FRONTEND_URL", "https://todo-app-fullstack-drab.vercel.app")  # Set this in your Vercel environment variables
 print(f"FRONTEND_URL environment variable: {frontend_url}")  # Debug log
-cors_origins = [frontend_url] if frontend_url != "*" else ["*"]
-print(f"CORS origins: {cors_origins}")  # Debug log
 
+# Explicitly allow your frontend URL
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=[frontend_url, "https://todo-app-fullstack-drab.vercel.app", "http://localhost:3000", "http://localhost:3001"],  # Allow your frontend and common dev URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Important: Allow credentials to be passed
+    allow_origin_regex=None,
 )
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
+
+# Only run startup events in appropriate environments
+import os
+if os.environ.get("VERCEL_ENV") is None:  # Only run locally
+    @app.on_event("startup")
+    def startup_event():
+        create_db_and_tables()
 
 @app.get("/")
 def read_root():
@@ -36,6 +44,11 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/test-cors")
+def test_cors():
+    """Test endpoint to check if CORS is working"""
+    return {"message": "CORS test successful", "timestamp": "now"}
 
 @app.get("/debug/env")
 def debug_env():
