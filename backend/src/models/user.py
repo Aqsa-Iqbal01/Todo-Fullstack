@@ -9,10 +9,10 @@ class UserBase(SQLModel):
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    password_hash: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    is_active: bool = Field(default=True)
+    password_hash: str = Field(sa_column_kwargs={"name": "hashed_password"})
+    created_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"name": "created_at"})
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"name": "updated_at"})
+    is_active: bool = Field(default=True, sa_column_kwargs={"name": "is_active"})
 
 
 class UserCreate(UserBase):

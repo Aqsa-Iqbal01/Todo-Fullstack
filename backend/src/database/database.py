@@ -5,7 +5,21 @@ import os
 from urllib.parse import urlparse
 
 # Get database URL from environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./todo_app.db?check_same_thread=False")
+from dotenv import load_dotenv
+import os
+# Load .env file from backend directory
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+env_path = os.path.join(backend_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Fallback to SQLite only if not found
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./todo_app.db?check_same_thread=False"
+    print("WARNING: Using SQLite database. Please set DATABASE_URL environment variable.")
+else:
+    print(f"Using database: {DATABASE_URL}")
 
 def create_engine_with_retry():
     """Create database engine with proper settings for Vercel serverless"""
@@ -42,5 +56,9 @@ def create_engine_with_retry():
 engine = create_engine_with_retry()
 
 def create_db_and_tables():
-    """Create database tables"""
-    SQLModel.metadata.create_all(bind=engine)
+    """Create database tables - works in serverless environment"""
+    try:
+        SQLModel.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Error creating tables: {e}")
+        raise

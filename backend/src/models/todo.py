@@ -14,7 +14,7 @@ class TodoBase(SQLModel):
 
 class Todo(TodoBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.id")
+    user_id: uuid.UUID = Field(foreign_key="user.id", sa_column_kwargs={"name": "user_id"})
     user: User = Relationship(sa_relationship_kwargs={"lazy": "select"})
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

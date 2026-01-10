@@ -33,6 +33,12 @@ app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
 # For Vercel serverless, we'll create tables as needed per request
 # rather than during startup
 
+@app.on_event("startup")
+def on_startup():
+    """Create database tables on startup"""
+    from .database.database import create_db_and_tables
+    create_db_and_tables()
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Todo API"}
