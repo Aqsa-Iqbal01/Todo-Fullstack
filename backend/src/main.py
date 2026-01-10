@@ -30,12 +30,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
 
-# Only run startup events in appropriate environments
-import os
-if os.environ.get("VERCEL_ENV") is None:  # Only run locally
-    @app.on_event("startup")
-    def startup_event():
-        create_db_and_tables()
+# For Vercel serverless, we'll create tables as needed per request
+# rather than during startup
 
 @app.get("/")
 def read_root():
