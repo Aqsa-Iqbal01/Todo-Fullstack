@@ -22,11 +22,31 @@ class TodoService:
 
     def create_todo(self, todo: TodoCreate, user_id: UUID) -> Todo:
         """Create a new todo for a user"""
+        # Handle due_date conversion if it's provided
+        due_date = todo.due_date
+        if due_date:
+            # Ensure due_date is a datetime object
+            if isinstance(due_date, str):
+                # Try to parse the string date
+                from datetime import datetime
+                try:
+                    # Handle ISO format dates (e.g., "2023-12-25T10:30:00" or "2023-12-25")
+                    if "T" in due_date:
+                        # It's an ISO format datetime string
+                        from dateutil.parser import parse
+                        due_date = parse(due_date)
+                    else:
+                        # It's a date string, convert to datetime
+                        due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+                except ValueError:
+                    # If parsing fails, set to None
+                    due_date = None
+
         db_todo = Todo(
             title=todo.title,
             description=todo.description,
             completed=getattr(todo, 'completed', False),  # Safely get completed field with default
-            due_date=todo.due_date,
+            due_date=due_date,
             user_id=user_id
         )
         self.session.add(db_todo)
@@ -43,7 +63,25 @@ class TodoService:
         # Update fields that are provided in the update
         update_data = todo_update.dict(exclude_unset=True)
         for field, value in update_data.items():
-            setattr(db_todo, field, value)
+            if field == "due_date" and value is not None and isinstance(value, str):
+                # Handle due_date conversion if it's provided as a string
+                try:
+                    # Handle ISO format dates (e.g., "2023-12-25T10:30:00" or "2023-12-25")
+                    if "T" in value:
+                        # It's an ISO format datetime string
+                        from dateutil.parser import parse
+                        parsed_date = parse(value)
+                        setattr(db_todo, field, parsed_date)
+                    else:
+                        # It's a date string, convert to datetime
+                        from datetime import datetime
+                        parsed_date = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                        setattr(db_todo, field, parsed_date)
+                except ValueError:
+                    # If parsing fails, set to None
+                    setattr(db_todo, field, None)
+            else:
+                setattr(db_todo, field, value)
 
         db_todo.updated_at = datetime.utcnow()
         self.session.add(db_todo)
