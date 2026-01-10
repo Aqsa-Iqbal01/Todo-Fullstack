@@ -12,13 +12,13 @@ if os.environ.get("VERCEL_ENV") is None:
 app = FastAPI(title="Todo API", version="1.0.0")
 
 # Configure CORS for production
-frontend_url = os.getenv("FRONTEND_URL", "https://todo-fullstack-back.vercel.app")  # Set this in your Vercel environment variables
+frontend_url = os.getenv("FRONTEND_URL", "https://todo-app-fullstack-drab.vercel.app")  # Set this in your Vercel environment variables
 print(f"FRONTEND_URL environment variable: {frontend_url}")  # Debug log
 
 # Explicitly allow your frontend URL
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "https://todo-fullstack-back.vercel.app", "http://localhost:3000", "http://localhost:3001"],  # Allow your frontend and common dev URLs
+    allow_origins=[frontend_url, "https://todo-app-fullstack-drab.vercel.app", "http://localhost:3000", "http://localhost:3001"],  # Allow your frontend and common dev URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
