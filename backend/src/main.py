@@ -12,9 +12,14 @@ if os.environ.get("VERCEL_ENV") is None:
 app = FastAPI(title="Todo API", version="1.0.0")
 
 # Configure CORS for production
+frontend_url = os.getenv("FRONTEND_URL", "*")  # Set this in your Vercel environment variables
+print(f"FRONTEND_URL environment variable: {frontend_url}")  # Debug log
+cors_origins = [frontend_url] if frontend_url != "*" else ["*"]
+print(f"CORS origins: {cors_origins}")  # Debug log
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend domain
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,6 +36,16 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/debug/env")
+def debug_env():
+    """Debug endpoint to check environment variables"""
+    return {
+        "FRONTEND_URL": os.getenv("FRONTEND_URL"),
+        "VERCEL_ENV": os.getenv("VERCEL_ENV"),
+        "DATABASE_URL_SET": bool(os.getenv("DATABASE_URL")),
+        "JWT_SECRET_SET": bool(os.getenv("JWT_SECRET"))
+    }
 
 # This is important for Vercel
 try:
