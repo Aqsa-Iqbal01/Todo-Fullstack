@@ -5,7 +5,7 @@ from .database.database import create_db_and_tables
 from dotenv import load_dotenv
 import os
 
-# Only load environment variables locally
+
 if os.environ.get("VERCEL_ENV") is None:
     load_dotenv()
 
