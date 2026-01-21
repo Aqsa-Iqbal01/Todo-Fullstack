@@ -6,7 +6,9 @@ python-multipart==0.0.6
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 alembic==1.13.1
-psycopg2-binary==2.9.9  # Needed for PostgreSQL on Vercel
+asyncpg==0.29.0  # Async PostgreSQL driver that works better with serverless
+aiosqlite==0.19.0  # For local SQLite support
+databases[postgresql]==0.8.0  # Async database interface
 python-dotenv==1.0.0
 PyJWT==2.8.0
 openai==1.3.5
