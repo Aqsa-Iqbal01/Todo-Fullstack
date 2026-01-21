@@ -78,5 +78,7 @@ def create_db_and_tables():
         # In serverless environments, table creation might fail due to read-only filesystem
         # This is expected in Vercel deployments with external databases
 
-# For compatibility with existing code, provide engine as an instance
-engine = get_engine()
+# For compatibility with existing code, provide engine as a function
+def get_global_engine():
+    """Get the global database engine instance"""
+    return get_engine()
