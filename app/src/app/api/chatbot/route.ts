@@ -28,8 +28,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Get the backend API URL from environment variables
+    const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
     // Forward the request to the backend's MCP-based chatbot endpoint
-    const response = await fetch('http://localhost:8001/api/chatbot', {
+    const response = await fetch(`${BACKEND_API_URL}/api/chatbot`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

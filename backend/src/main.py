@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api import auth, todos
-# Temporarily disable chatbot until deployment is stable
-# from .api.chatbot import router as chatbot_router
+from .api.chatbot import router as chatbot_router
 from .database.database import create_db_and_tables
 from dotenv import load_dotenv
 import os
@@ -31,7 +30,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
-# app.include_router(chatbot_router, prefix="/api", tags=["chatbot"])  # Temporarily disabled
+app.include_router(chatbot_router, prefix="/api", tags=["chatbot"])
 
 # For Vercel serverless, we'll create tables as needed per request
 # rather than during startup
@@ -39,6 +38,16 @@ app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
 @app.on_event("startup")
 def on_startup():
     """Create database tables on startup"""
+    import os
+    from .database.database import DATABASE_URL
+    # Only skip table creation on Vercel for PostgreSQL; create tables for SQLite even locally
+    if os.getenv("VERCEL_ENV"):
+        # On Vercel, skip if using PostgreSQL (managed DB), but not if somehow using SQLite
+        if "postgresql" in DATABASE_URL.lower():
+            print("Skipping table creation on Vercel with PostgreSQL")
+            return
+
+    # Create tables for local development (SQLite) or Vercel with SQLite
     from .database.database import create_db_and_tables
     create_db_and_tables()
 
