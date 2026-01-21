@@ -43,7 +43,11 @@ def on_startup():
     # Only skip table creation on Vercel for PostgreSQL; create tables for SQLite even locally
     if os.getenv("VERCEL_ENV"):
         # On Vercel, skip if using PostgreSQL (managed DB), but not if somehow using SQLite
-        if "postgresql" in DATABASE_URL.lower():
+        # Also skip if DATABASE_URL is None (which indicates misconfiguration)
+        if DATABASE_URL is None:
+            print("ERROR: DATABASE_URL is not configured for Vercel deployment!")
+            return
+        elif "postgresql" in DATABASE_URL.lower():
             print("Skipping table creation on Vercel with PostgreSQL")
             return
 

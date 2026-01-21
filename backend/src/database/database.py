@@ -2,34 +2,30 @@ from sqlmodel import SQLModel, create_engine
 from ..models.user import User
 from ..models.todo import Todo
 import os
-
-# Get database URL from environment variable
 from dotenv import load_dotenv
-# Load .env file from backend directory
-backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-env_path = os.path.join(backend_dir, '.env')
-load_dotenv(dotenv_path=env_path)
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+# For Vercel deployment, environment variables should be set in the Vercel dashboard
+# Only load .env file if we're not in Vercel environment
+if not os.getenv("VERCEL_ENV"):
+    backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    env_path = os.path.join(backend_dir, '.env')
+    load_dotenv(dotenv_path=env_path)
 
-# For Vercel deployment, use PostgreSQL directly
+# Determine DATABASE_URL based on environment
 if os.getenv("VERCEL_ENV"):
-    # Vercel provides POSTGRES_URL for PostgreSQL databases
-    # If POSTGRES_URL is available, use it; otherwise fall back to DATABASE_URL
-    vercel_db_url = os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
-    if vercel_db_url and vercel_db_url.startswith("postgresql"):
-        DATABASE_URL = vercel_db_url
+    # For Vercel deployment, prioritize PostgreSQL URLs
+    DATABASE_URL = os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
+    if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
         print(f"Using PostgreSQL for Vercel deployment: {DATABASE_URL}")
     else:
-        # If no PostgreSQL URL is provided, try to use the original DATABASE_URL
-        if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
-            print(f"Using PostgreSQL for Vercel deployment: {DATABASE_URL}")
-        else:
-            # This is problematic - Vercel can't use SQLite
-            print("ERROR: No PostgreSQL database URL found for Vercel deployment!")
-            print("Please set either POSTGRES_URL or DATABASE_URL environment variable with PostgreSQL connection string")
+        # This is problematic - Vercel can't use SQLite due to read-only filesystem
+        print("ERROR: No PostgreSQL database URL found for Vercel deployment!")
+        print("Please set either POSTGRES_URL or DATABASE_URL environment variable with PostgreSQL connection string")
+        # Don't fall back to SQLite in Vercel - it won't work
+        DATABASE_URL = None  # This will cause an error if used, which is better than silent failure
 else:
     # For local development, check if PostgreSQL is available, otherwise use SQLite
+    DATABASE_URL = os.getenv("DATABASE_URL")
     if DATABASE_URL and DATABASE_URL.startswith("postgresql"):
         # Test if we can connect to PostgreSQL, if not, fall back to SQLite
         try:
@@ -51,6 +47,9 @@ else:
 # Create engine - defer initialization until needed to avoid import issues
 def get_engine():
     """Get database engine - initialize only when called to avoid import issues on Vercel"""
+    if DATABASE_URL is None:
+        raise ValueError("DATABASE_URL is not set. Please configure your database environment variables.")
+
     # Set appropriate connection arguments based on database type
     if "sqlite" in DATABASE_URL:
         connect_args = {"check_same_thread": False}
