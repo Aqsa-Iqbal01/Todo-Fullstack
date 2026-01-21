@@ -14,12 +14,20 @@ import sys
 import os
 
 # Add the project root directory to the Python path so imports work correctly
-project_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-phase_3_dir = os.path.join(project_root, 'phase-3')
+# For Vercel deployment, phase-3 is copied to the same directory as the backend
 
-# Insert both directories to the path
-if phase_3_dir not in sys.path:
-    sys.path.insert(0, phase_3_dir)
+# First try the original path (for local development)
+project_root = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+original_phase_3_dir = os.path.join(project_root, 'phase-3')
+
+# Then try the copied path (for Vercel deployment)
+copied_phase_3_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'phase-3')
+
+# Insert both directories to the path, with copied path taking priority for Vercel
+if copied_phase_3_dir not in sys.path:
+    sys.path.insert(0, copied_phase_3_dir)
+if original_phase_3_dir not in sys.path:
+    sys.path.insert(0, original_phase_3_dir)
 
 # Now import the chat interface
 try:

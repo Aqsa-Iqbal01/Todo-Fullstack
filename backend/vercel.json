@@ -11,5 +11,11 @@
       "src": "/(.*)",
       "dest": "src/main.py"
     }
-  ]
+  ],
+  "functions": {
+    "src/main.py": {
+      "runtime": "python3.9",
+      "excludeFiles": "{.git,node_modules,.cache}"
+    }
+  }
 }
