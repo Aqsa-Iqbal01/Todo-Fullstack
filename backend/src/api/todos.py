@@ -9,6 +9,7 @@ from ..auth.auth_handler import get_current_user
 from ..services.todo_service import TodoService
 from datetime import datetime
 import jwt
+from jwt.exceptions import PyJWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
 
@@ -35,7 +36,7 @@ async def get_current_user_from_token(credentials: HTTPAuthorizationCredentials 
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return email
-    except jwt.JWTError:
+    except PyJWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTheme } from '@/contexts/ThemeContext';
 
 const Navbar: React.FC = () => {
@@ -61,7 +62,21 @@ const Navbar: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">Todo<span className="font-light opacity-90">Pro</span></span>
+              <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">Todo<span className="font-light text-gray-700 dark:text-gray-200 opacity-90 dark:opacity-100">Pro</span></span>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="ml-10 flex space-x-8">
+              <Link href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors duration-200 font-medium">
+                Dashboard
+              </Link>
+              <Link href="/chatbotPage
+              
+              
+              
+              " className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors duration-200 font-medium">
+                AI Assistant
+              </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -103,7 +118,7 @@ const Navbar: React.FC = () => {
               onClick={handleLogout}
               className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               Logout

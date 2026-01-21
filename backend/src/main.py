@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api import auth, todos
+from .api.chatbot import router as chatbot_router
 from .database.database import create_db_and_tables
 from dotenv import load_dotenv
 import os
@@ -29,6 +30,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(todos.router, prefix="/api/todos", tags=["todos"])
+app.include_router(chatbot_router, prefix="/api", tags=["chatbot"])
 
 # For Vercel serverless, we'll create tables as needed per request
 # rather than during startup

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 import jwt
+from jwt.exceptions import PyJWTError
 import bcrypt
 from sqlmodel import Session, select
 from ..models.user import User, UserCreate
@@ -89,5 +90,5 @@ def get_current_user(token: str):
         # In a real implementation, you would fetch user from database
         # For now, we'll return the email as a simple identifier
         return email
-    except jwt.JWTError:
+    except PyJWTError:
         return None

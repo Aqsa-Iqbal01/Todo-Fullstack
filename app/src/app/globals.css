@@ -3,19 +3,28 @@
 @tailwind utilities;
 
 :root {
-
-  
-
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Light mode colors */
+  --foreground-rgb: 30, 30, 30;
+  --background-start-rgb: 249, 250, 251; /* gray-50 */
+  --background-end-rgb: 255, 255, 255;   /* white */
+  --card-bg-rgb: 255, 255, 255;          /* white */
+  --card-border-rgb: 235, 235, 240;      /* gray-100 */
+  --primary-rgb: 79, 70, 229;             /* indigo-600 */
+  --primary-hover-rgb: 67, 56, 202;       /* indigo-700 */
+  --secondary-rgb: 124, 58, 237;          /* violet-600 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    /* Dark mode colors */
+    --foreground-rgb: 240, 240, 240;
+    --background-start-rgb: 17, 17, 22;  /* gray-900 */
+    --background-end-rgb: 10, 10, 15;    /* gray-950 */
+    --card-bg-rgb: 30, 30, 35;           /* gray-800 */
+    --card-border-rgb: 45, 45, 50;       /* gray-700 */
+    --primary-rgb: 139, 92, 246;          /* violet-500 */
+    --primary-hover-rgb: 124, 58, 237;    /* violet-600 */
+    --secondary-rgb: 167, 139, 250;       /* violet-400 */
   }
 }
 
@@ -23,8 +32,33 @@ body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
-      transparent,
+      rgb(var(--background-start-rgb)),
       rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    );
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar styling for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--background-end-rgb), 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--primary-rgb), 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--primary-rgb), 0.8);
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }

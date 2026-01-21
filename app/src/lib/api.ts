@@ -1,5 +1,6 @@
 // API utility functions for the Todo App
 
+// Use backend API for production, with fallback to mock routes when backend is not available
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 /**
@@ -20,7 +21,9 @@ export const authenticatedRequest = async (
     (headers as any)['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    let url = `${API_BASE_URL}${endpoint}`; // Use base URL for all API routes
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });
@@ -40,7 +43,9 @@ export const unauthenticatedRequest = async (
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    let url = `${API_BASE_URL}${endpoint}`; // Use base URL for all API routes
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });

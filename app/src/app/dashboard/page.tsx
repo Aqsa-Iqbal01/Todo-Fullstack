@@ -71,31 +71,47 @@ export default function DashboardPage() {
     }
   }, [router]);
 
-  // Load todos
-  useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const response = await todoAPI.getTodos();
-        if (response.ok) {
-          const data = await response.json();
-          setTodos(data);
-        } else {
-          console.error('Failed to fetch todos');
-          // If unauthorized, redirect to login
-          if (response.status === 401) {
-            localStorage.removeItem('token');
-            router.push('/login');
-          }
+  // Function to fetch todos
+  const fetchTodos = async () => {
+    try {
+      setLoading(true);
+      const response = await todoAPI.getTodos();
+      if (response.ok) {
+        const data = await response.json();
+        setTodos(data);
+      } else {
+        console.error('Failed to fetch todos');
+        // If unauthorized, redirect to login
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          router.push('/login');
         }
-      } catch (error) {
-        console.error('Error fetching todos:', error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Load todos initially
+  useEffect(() => {
     fetchTodos();
   }, [router]);
+
+  // Listen for todosUpdated event to refresh the list when tasks are modified via chatbot
+  useEffect(() => {
+    const handleTodosUpdated = () => {
+      fetchTodos(); // Refresh the todo list
+    };
+
+    window.addEventListener('todosUpdated', handleTodosUpdated);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('todosUpdated', handleTodosUpdated);
+    };
+  }, [fetchTodos]); // Include fetchTodos in the dependency array
 
   const handleCreateTodo = () => {
     setCurrentTodo(null);
@@ -458,6 +474,22 @@ export default function DashboardPage() {
           onClose={() => setShowModal(false)}
         />
       )}
+
+      {/* Floating Chatbot Button */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
+          onClick={() => router.push('/chatbotPage')}
+          className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-all duration-300 transform hover:scale-110 flex items-center justify-center group"
+          title="Open AI Assistant"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          <span className="absolute -top-10 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            AI Assistant
+          </span>
+        </button>
+      </div>
     </div>
     </>
   );
