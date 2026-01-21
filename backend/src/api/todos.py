@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 from ..models.todo import Todo, TodoCreate, TodoRead, TodoUpdate
 from ..models.user import User
-from ..database.database import engine
+from ..database.database import get_engine
 from ..auth.auth_handler import get_current_user
 from ..services.todo_service import TodoService
 from datetime import datetime
@@ -46,7 +46,7 @@ async def get_current_user_from_token(credentials: HTTPAuthorizationCredentials 
 @router.get("/", response_model=List[TodoRead])
 async def get_todos(current_user_email: str = Depends(get_current_user_from_token)):
     """Get all todos for the current user"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Get the user first
         user_statement = select(User).where(User.email == current_user_email)
         user = session.exec(user_statement).first()
@@ -64,7 +64,7 @@ async def get_todos(current_user_email: str = Depends(get_current_user_from_toke
 @router.post("/", response_model=TodoRead)
 async def create_todo(todo: TodoCreate, current_user_email: str = Depends(get_current_user_from_token)):
     """Create a new todo for the current user"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Get the user first
         user_statement = select(User).where(User.email == current_user_email)
         user = session.exec(user_statement).first()
@@ -82,7 +82,7 @@ async def create_todo(todo: TodoCreate, current_user_email: str = Depends(get_cu
 @router.put("/{todo_id}", response_model=TodoRead)
 async def update_todo(todo_id: UUID, todo: TodoUpdate, current_user_email: str = Depends(get_current_user_from_token)):
     """Update an existing todo for the current user"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Get the user first
         user_statement = select(User).where(User.email == current_user_email)
         user = session.exec(user_statement).first()
@@ -106,7 +106,7 @@ async def update_todo(todo_id: UUID, todo: TodoUpdate, current_user_email: str =
 @router.delete("/{todo_id}")
 async def delete_todo(todo_id: UUID, current_user_email: str = Depends(get_current_user_from_token)):
     """Delete a todo for the current user"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Get the user first
         user_statement = select(User).where(User.email == current_user_email)
         user = session.exec(user_statement).first()
@@ -130,7 +130,7 @@ async def delete_todo(todo_id: UUID, current_user_email: str = Depends(get_curre
 @router.patch("/{todo_id}/toggle", response_model=TodoRead)
 async def toggle_todo_completion(todo_id: UUID, current_user_email: str = Depends(get_current_user_from_token)):
     """Toggle the completion status of a todo"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Get the user first
         user_statement = select(User).where(User.email == current_user_email)
         user = session.exec(user_statement).first()

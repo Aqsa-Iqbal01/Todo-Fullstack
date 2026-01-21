@@ -5,7 +5,7 @@ from jwt.exceptions import PyJWTError
 import bcrypt
 from sqlmodel import Session, select
 from ..models.user import User, UserCreate
-from ..database.database import engine
+from ..database.database import get_engine
 import os
 from dotenv import load_dotenv
 
@@ -61,13 +61,15 @@ def get_password_hash(password: str) -> str:
         else:
             raise e
 
-def authenticate_user(session: Session, email: str, password: str) -> Optional[User]:
+def authenticate_user(email: str, password: str) -> Optional[User]:
     """Authenticate user by email and password"""
-    statement = select(User).where(User.email == email)
-    user = session.exec(statement).first()
-    if not user or not verify_password(password, user.password_hash):
-        return None
-    return user
+    engine = get_engine()
+    with Session(engine) as session:
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if not user or not verify_password(password, user.password_hash):
+            return None
+        return user
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create JWT access token"""
