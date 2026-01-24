@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 7860
 
 # Set the command to run the application
-CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]
