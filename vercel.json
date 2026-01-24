@@ -18,5 +18,10 @@
       "src": "/(.*)",
       "dest": "backend/src/main.py"
     }
-  ]
+  ],
+  "functions": {
+    "backend/src/main.py": {
+      "maxDuration": 60
+    }
+  }
 }

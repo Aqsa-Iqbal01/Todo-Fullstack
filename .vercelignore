@@ -1,0 +1,12 @@
+# Ignore node_modules and other unnecessary files
+node_modules/
+*.log
+.env
+.git/
+__pycache__/
+*.pyc
+.history/
+.phase-3/
+
+# Only deploy the backend
+!backend/
