@@ -1,5 +1,5 @@
 """
-Test script to verify the chatbot functionality with MCP server
+Test script to verify the chatbot functionality with MCP server.
 """
 import asyncio
 import httpx
