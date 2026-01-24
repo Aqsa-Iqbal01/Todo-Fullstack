@@ -53,20 +53,30 @@ def get_engine():
     # Set appropriate connection arguments based on database type
     if "sqlite" in DATABASE_URL:
         connect_args = {"check_same_thread": False}
+        # For SQLite
+        engine = create_engine(
+            DATABASE_URL,
+            echo=False,  # Turn off SQL logging in production
+            connect_args=connect_args,
+        )
     else:
-        # For PostgreSQL, especially in serverless, we may need different settings
+        # For PostgreSQL, especially in serverless, we need different settings
         connect_args = {
             "connect_timeout": 10,
         }
 
-    return create_engine(
-        DATABASE_URL,
-        echo=False,  # Turn off SQL logging in production
-        connect_args=connect_args,
-        # For serverless, we should pool_recycle connections quickly
-        pool_recycle=300,  # Recycle connections every 5 minutes
-        pool_pre_ping=True,  # Verify connections before use
-    )
+        # For serverless PostgreSQL, use different pool settings
+        engine = create_engine(
+            DATABASE_URL,
+            echo=False,  # Turn off SQL logging in production
+            connect_args=connect_args,
+            pool_pre_ping=True,  # Verify connections before use
+            pool_recycle=300,  # Recycle connections every 5 minutes
+            pool_size=5,
+            max_overflow=10,
+        )
+
+    return engine
 
 def create_db_and_tables():
     """Create database tables"""
