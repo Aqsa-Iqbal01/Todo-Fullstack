@@ -11,6 +11,7 @@ from pydantic import BaseModel
 import httpx
 import sys
 import os
+from dotenv import load_dotenv
 
 # Add the phase-3 directory to the path for proper imports
 current_dir = os.path.dirname(__file__)
@@ -25,6 +26,12 @@ sys.path.insert(0, os.path.join(phase3_dir, 'adapters'))
 sys.path.insert(0, os.path.join(phase3_dir, 'services'))
 sys.path.insert(0, os.path.join(phase3_dir, 'config'))
 
+# Load environment variables from .env file if not in production
+if not os.getenv("VERCEL_ENV"):
+    phase3_dir = os.path.dirname(os.path.dirname(__file__))
+    env_path = os.path.join(phase3_dir, '.env')
+    load_dotenv(dotenv_path=env_path)
+
 # Handle config import separately to avoid issues
 try:
     from config.settings import settings
@@ -33,7 +40,7 @@ except ImportError:
     # Create a minimal settings object as fallback
     class Settings:
         def __init__(self):
-            self.backend_api_url = os.getenv("BACKEND_API_URL", "http://localhost:8000/api")
+            self.backend_api_url = os.getenv("BACKEND_API_URL", "http://localhost:8004/api")
             self.require_auth = os.getenv("REQUIRE_AUTH", "true").lower() == "true"
             self.mcp_port = int(os.getenv("MCP_PORT", "8080"))
             self.mcp_host = os.getenv("MCP_HOST", "localhost")

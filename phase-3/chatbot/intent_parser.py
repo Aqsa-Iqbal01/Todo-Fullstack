@@ -24,10 +24,11 @@ class IntentParser:
                 r'\b(need to|want to|have to|must|should)\b.*\b(add|create|make|buy|get|do|finish|complete|write|call|send|order)\b',
             ],
             IntentType.READ_TODOS: [
-                r'\b(show|list|display|see|view|what|check|look|tell me|give me)\b.*\b(my|current|existing|pending|active)\b.*\b(todo|task|item|list|things)\b',
-                r'\b(what|show|list|display|view|see)\b.*\b(have to|got to|need to|to do|todo|tasks)\b',
-                r'\b(do i|did i|what)\b.*\b(have|got|placed|put)\b.*\b(on|in)\b.*\b(my|the)\b.*\b(list|todo|task)\b',
+                r'\b(show|list|display|see|view|check|look|tell me|give me)\b.*\b(my|current|existing|pending|active)\b.*\b(todo|task|item|list|things)\b',
+                r'\b(show|list|display|view|see)\b.*\b(have to|got to|need to|to do|todo|tasks)\b',
+                r'\b(do i|did i)\b.*\b(have|got|placed|put)\b.*\b(on|in)\b.*\b(my|the)\b.*\b(list|todo|task)\b',
                 r'\b(all|my|current|existing|pending|active)\b.*\b(todo|task|item|list|things)\b',
+                r'\b(what)\b.*\b(todo|task|do|have to|need to|to do|on my list)\b',
             ],
             IntentType.UPDATE_TODO: [
                 r'\b(mark|set|change|update|modify|edit|complete|finish|done)\b.*\b(as|to|be)\b.*\b(complete|done|finished|completed|pending|in progress|high|medium|low)\b',
@@ -52,11 +53,11 @@ class IntentParser:
         # Simple keywords for fallback classification
         self.keyword_map = {
             IntentType.CREATE_TODO: ['add', 'create', 'new', 'make', 'put', 'set'],
-            IntentType.READ_TODOS: ['show', 'list', 'display', 'see', 'view', 'what', 'check'],
+            IntentType.READ_TODOS: ['show', 'list', 'display', 'see', 'view', 'check', 'my', 'todos', 'tasks', 'to do'],
             IntentType.UPDATE_TODO: ['mark', 'set', 'change', 'update', 'modify', 'edit', 'complete', 'done', 'finish'],
             IntentType.DELETE_TODO: ['delete', 'remove', 'cancel', 'clear', 'eliminate'],
             # Add keywords for general conversation
-            IntentType.GENERAL_CONVERSATION: ['hi', 'hello', 'hey', 'greetings', 'help', 'what', 'how', 'can', 'please']
+            IntentType.GENERAL_CONVERSATION: ['hi', 'hello', 'hey', 'greetings', 'help', 'how', 'can', 'please', 'weather', 'joke', 'movie', 'time', 'capital', 'cricket', 'moon', 'far']
         }
 
     def classify_intent(self, text: str) -> str:

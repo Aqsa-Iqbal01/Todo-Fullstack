@@ -26,7 +26,7 @@ class TodoService:
 
     async def create_todo(self, title: str, description: str = "", due_date: Optional[str] = None,
                          status: str = "PENDING", priority: str = "MEDIUM", tags: List[str] = None,
-                         auth_token: str = "") -> Dict[str, Any]:
+                         completed: bool = False, auth_token: str = "") -> Dict[str, Any]:
         """
         Create a new todo
 
@@ -60,9 +60,7 @@ class TodoService:
             title=title,
             description=description,
             due_date=due_date,
-            status=status,
-            priority=priority,
-            tags=tags or [],
+            completed=completed,
             auth_token=auth_token
         )
 

@@ -2,6 +2,13 @@
 
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if not in production
+if not os.getenv("VERCEL_ENV"):
+    phase3_dir = os.path.dirname(os.path.dirname(__file__))
+    env_path = os.path.join(phase3_dir, '.env')
+    load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
@@ -10,7 +17,7 @@ class Settings:
     def __init__(self):
         # API endpoints
         self.backend_api_url: str = os.getenv(
-            "BACKEND_API_URL", "http://localhost:8001/api"
+            "BACKEND_API_URL", "http://localhost:8004/api"
         )
 
         # Authentication

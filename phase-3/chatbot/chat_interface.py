@@ -104,6 +104,15 @@ class ChatInterface:
                         "entities": {},
                         "action_taken": "help_response"
                     }
+                elif any(topic in user_input_lower for topic in ['weather', 'joke', 'movie', 'time', 'capital', 'cricket', 'moon', 'far', 'who won', 'recommend']):
+                    # Handle non-todo related queries specifically
+                    return {
+                        "success": False,  # Indicate this is not a todo operation
+                        "message": "I specialize in helping you manage your todos. I can't answer questions about weather, jokes, movies, or other topics. I can help with adding, showing, updating, or deleting your tasks. For example: 'Add buy groceries to my list'.",
+                        "intent": "GENERAL_CONVERSATION",
+                        "entities": {},
+                        "action_taken": "non_todo_query_response"
+                    }
                 else:
                     # For other general conversation, provide a default response
                     return {
@@ -128,14 +137,15 @@ class ChatInterface:
                     "data": result.get("result", {}).get("todo") or result.get("result", {}).get("todos")
                 }
             else:
-                # Check if the intent was UNKNOWN and provide a more helpful response
+                # Check if the intent was UNKNOWN and provide a more appropriate response
                 if result.get("intent") == "UNKNOWN":
+                    # For truly unknown queries, provide a helpful response but mark as not successful for todo operations
                     response = {
-                        "success": True,
+                        "success": False,  # Changed to False to indicate this wasn't a successful todo operation
                         "message": "I'm not sure I understood that. I can help you manage your todos! Try commands like: 'Add buy groceries to my list', 'Show my todos', 'Mark buy groceries as complete', or 'Delete the meeting with John'.",
                         "intent": "UNKNOWN",
                         "entities": result.get("entities", {}),
-                        "error": result.get("result", {}).get("error", "Processing failed")
+                        "error": result.get("result", {}).get("error", "Unknown intent - not a todo operation")
                     }
                 else:
                     response = {

@@ -70,7 +70,15 @@ This is a full-stack todo application with user authentication and persistent st
 
 5. Run the backend:
    ```bash
-   uvicorn src.main:app --reload
+   # If you encounter pydantic compatibility issues, first install the correct version:
+   pip install "pydantic>=2.5,<2.10"
+
+   # Then run the backend:
+   python -c "from src.main import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8000)"
+   ```
+   Or alternatively:
+   ```bash
+   uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
 ### Frontend Setup

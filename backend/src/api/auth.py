@@ -7,7 +7,7 @@ from ..auth.auth_handler import (
     authenticate_user,
     create_access_token
 )
-from ..database.database import engine
+from ..database.database import get_engine
 from datetime import timedelta
 
 
@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("/register", response_model=UserRead)
 def register(user: UserCreate):
     """Register a new user"""
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         # Check if user already exists
         existing_user = session.exec(select(User).where(User.email == user.email)).first()
         if existing_user:

@@ -97,7 +97,9 @@ async def chat_endpoint(
             auth_token=auth_token
         )
 
-        return {
+        # For non-todo related queries, we might want to handle them differently
+        # but still return the response from the chat interface
+        response_data = {
             "success": result["success"],
             "response": {
                 "message": result["message"],
@@ -107,6 +109,12 @@ async def chat_endpoint(
             },
             "conversation_context": {"conversation_context": "mcp_based"}
         }
+
+        # If the intent is not related to todos and the operation wasn't successful,
+        # we might want to return a different response, but for now we'll return as is
+        # to maintain compatibility with the frontend
+
+        return response_data
 
     except HTTPException:
         raise

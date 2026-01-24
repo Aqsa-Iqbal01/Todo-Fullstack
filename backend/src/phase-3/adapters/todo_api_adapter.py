@@ -25,8 +25,7 @@ class TodoAPIAdapter:
         self.base_url = settings.backend_api_url
 
     async def create_todo(self, title: str, description: str = "", due_date: Optional[str] = None,
-                         status: str = "PENDING", priority: str = "MEDIUM", tags: List[str] = None,
-                         auth_token: str = "") -> Dict[str, Any]:
+                         completed: bool = False, auth_token: str = "") -> Dict[str, Any]:
         """
         Create a new todo via the backend API
 
@@ -34,16 +33,12 @@ class TodoAPIAdapter:
             title: Title of the todo
             description: Description of the todo
             due_date: Due date in YYYY-MM-DD format
-            status: Status of the todo
-            priority: Priority level
-            tags: List of tags
+            completed: Whether the todo is completed
             auth_token: Authentication token
 
         Returns:
             Response from the backend API
         """
-        if tags is None:
-            tags = []
 
         url = f"{self.base_url}/todos/"
 
@@ -56,10 +51,10 @@ class TodoAPIAdapter:
         if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
-            if clean_token.startswith('Bearer '):
-                clean_token = clean_token[7:]  # Remove 'Bearer ' prefix if present
-            elif clean_token.startswith('bearer '):
-                clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
+            if clean_token.lower().startswith('bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
+            elif clean_token.startswith('Bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
 
             headers["Authorization"] = f"Bearer {clean_token}"
             print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
@@ -72,9 +67,7 @@ class TodoAPIAdapter:
             "title": title,
             "description": description,
             "due_date": due_date,
-            "status": status,
-            "priority": priority,
-            "tags": tags
+            "completed": completed  # Use the passed value
         }
 
         try:
@@ -135,10 +128,10 @@ class TodoAPIAdapter:
         if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
-            if clean_token.startswith('Bearer '):
-                clean_token = clean_token[7:]  # Remove 'Bearer ' prefix if present
-            elif clean_token.startswith('bearer '):
-                clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
+            if clean_token.lower().startswith('bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
+            elif clean_token.startswith('Bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
 
             headers["Authorization"] = f"Bearer {clean_token}"
             print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
@@ -211,10 +204,10 @@ class TodoAPIAdapter:
         if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
-            if clean_token.startswith('Bearer '):
-                clean_token = clean_token[7:]  # Remove 'Bearer ' prefix if present
-            elif clean_token.startswith('bearer '):
-                clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
+            if clean_token.lower().startswith('bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
+            elif clean_token.startswith('Bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
 
             headers["Authorization"] = f"Bearer {clean_token}"
             print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
@@ -279,10 +272,10 @@ class TodoAPIAdapter:
         if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
-            if clean_token.startswith('Bearer '):
-                clean_token = clean_token[7:]  # Remove 'Bearer ' prefix if present
-            elif clean_token.startswith('bearer '):
-                clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
+            if clean_token.lower().startswith('bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
+            elif clean_token.startswith('Bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
 
             headers["Authorization"] = f"Bearer {clean_token}"
             print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
@@ -335,10 +328,10 @@ class TodoAPIAdapter:
         if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
-            if clean_token.startswith('Bearer '):
-                clean_token = clean_token[7:]  # Remove 'Bearer ' prefix if present
-            elif clean_token.startswith('bearer '):
-                clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
+            if clean_token.lower().startswith('bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
+            elif clean_token.startswith('Bearer '):
+                clean_token = clean_token[7:].strip()  # Remove 'Bearer ' prefix if present
 
             headers["Authorization"] = f"Bearer {clean_token}"
             print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print

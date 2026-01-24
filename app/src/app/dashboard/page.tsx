@@ -102,6 +102,8 @@ export default function DashboardPage() {
   // Listen for todosUpdated event to refresh the list when tasks are modified via chatbot
   useEffect(() => {
     const handleTodosUpdated = () => {
+      // Store the update timestamp in localStorage
+      localStorage.setItem('lastTodoUpdate', new Date().toISOString());
       fetchTodos(); // Refresh the todo list
     };
 
@@ -112,6 +114,34 @@ export default function DashboardPage() {
       window.removeEventListener('todosUpdated', handleTodosUpdated);
     };
   }, [fetchTodos]); // Include fetchTodos in the dependency array
+
+  // Refresh todos when the page becomes visible (handles case where user was on another page/tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Check if there was a recent todo update
+        const lastUpdateStr = localStorage.getItem('lastTodoUpdate');
+        if (lastUpdateStr) {
+          const lastUpdate = new Date(lastUpdateStr);
+          const now = new Date();
+          // If the last update was within the last 5 minutes, refresh todos
+          if ((now.getTime() - lastUpdate.getTime()) < 5 * 60 * 1000) {
+            fetchTodos(); // Refresh todos when page becomes visible/active
+          }
+        } else {
+          // If no record of updates, still fetch todos
+          fetchTodos();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchTodos]);
 
   const handleCreateTodo = () => {
     setCurrentTodo(null);

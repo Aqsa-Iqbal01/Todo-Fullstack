@@ -5,6 +5,7 @@ that processes natural language input using MCP tools.
 """
 
 import asyncio
+import httpx
 from typing import Dict, Any
 from .intent_parser import IntentParser
 from .entity_extractor import EntityExtractor
@@ -27,36 +28,64 @@ except Exception as e:
     print(f"OpenAI integration not available: {e}")
     print("Falling back to rule-based parsing")
 
-# Now import the process_nlp_request function
-try:
-    from mcp_server.server import process_nlp_request
-except ImportError as e:
-    print(f"Error importing process_nlp_request: {e}")
-    print("Attempting to import from absolute path...")
+# Use HTTP client to communicate with MCP server running as a separate service
+async def process_nlp_request(user_input: str, auth_token: str, conversation_id: str = None) -> dict:
+    """
+    Process NLP request by making HTTP call to MCP server
+    """
+    # Use environment variable or default to localhost:12345 with proper protocol
+    mcp_server_url = os.getenv("MCP_SERVER_URL", "http://localhost:12345")
 
-    # Try to import from the absolute path
-    mcp_server_dir = os.path.join(phase_3_dir, 'mcp_server')
-    if mcp_server_dir not in sys.path:
-        sys.path.insert(0, mcp_server_dir)
+    # Prepare the request payload
+    payload = {"input": user_input}
+    if conversation_id:
+        payload["conversation_id"] = conversation_id
 
     try:
-        from server import process_nlp_request
-    except ImportError:
-        print("Error: Could not import process_nlp_request. Creating mock function.")
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Clean and format the auth token properly
+            clean_auth_token = auth_token.strip()
+            if clean_auth_token.lower().startswith('bearer '):
+                clean_auth_token = clean_auth_token[7:].strip()
+            elif clean_auth_token.startswith('Bearer '):
+                clean_auth_token = clean_auth_token[7:].strip()
 
-        # Create a mock function if import fails
-        async def process_nlp_request(user_input: str, auth_token: str) -> dict:
-            return {
-                "success": False,
-                "result": {
-                    "message": "MCP server is currently unavailable. Please check if the server is running.",
-                    "action_taken": "none",
-                    "todo": None,
-                    "error": "Import error - service unavailable"
-                },
-                "intent": "ERROR",
-                "entities": {}
-            }
+            response = await client.post(
+                f"{mcp_server_url}/mcp/process_nlp",
+                json=payload,
+                headers={
+                    "Authorization": f"Bearer {clean_auth_token}",
+                    "Content-Type": "application/json"
+                }
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                return result
+            else:
+                return {
+                    "success": False,
+                    "result": {
+                        "message": f"MCP server returned error: {response.status_code}",
+                        "action_taken": "none",
+                        "todo": None,
+                        "error": f"HTTP {response.status_code}: {response.text}"
+                    },
+                    "intent": "ERROR",
+                    "entities": {}
+                }
+    except Exception as e:
+        return {
+            "success": False,
+            "result": {
+                "message": f"MCP server is currently unavailable. Please check if the server is running on {mcp_server_url}. Error: {str(e)}",
+                "action_taken": "none",
+                "todo": None,
+                "error": str(e)
+            },
+            "intent": "ERROR",
+            "entities": {}
+        }
 
 
 class ChatInterface:
@@ -80,7 +109,11 @@ class ChatInterface:
         """
         try:
             # First, classify the intent using the intent parser
-            intent = self.intent_parser.classify_intent(user_input)
+            # Use OpenAI parser if available, otherwise fall back to local parser
+            if openai_available and hasattr(self, 'openai_intent_parser') and self.openai_intent_parser is not None:
+                intent = self.openai_intent_parser.classify_intent(user_input)
+            else:
+                intent = self.intent_parser.classify_intent(user_input)
 
             # Handle general conversation and greetings specially
             if intent == "GENERAL_CONVERSATION":
@@ -115,7 +148,7 @@ class ChatInterface:
                     }
 
             # For other intents, process through the MCP system
-            result = await process_nlp_request(user_input, auth_token)
+            result = await process_nlp_request(user_input, auth_token, conversation_id)
 
             # Format the response based on the result
             if result["success"]:
@@ -125,7 +158,7 @@ class ChatInterface:
                     "intent": result.get("intent", "UNKNOWN"),
                     "entities": result.get("entities", {}),
                     "action_taken": result.get("result", {}).get("action_taken", "unknown"),
-                    "data": result.get("result", {}).get("todo") or result.get("result", {}).get("todos")
+                    "data": result.get("result", {}).get("todo") or result.get("result", {}).get("operation_result") or result.get("result", {}).get("todos")
                 }
             else:
                 # Check if the intent was UNKNOWN and provide a more helpful response

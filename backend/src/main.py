@@ -52,8 +52,10 @@ def on_startup():
             return
 
     # Create tables for local development (SQLite) or Vercel with SQLite
+    print("Creating database tables on startup...")
     from .database.database import create_db_and_tables
     create_db_and_tables()
+    print("Database tables created successfully!")
 
 @app.get("/")
 def read_root():

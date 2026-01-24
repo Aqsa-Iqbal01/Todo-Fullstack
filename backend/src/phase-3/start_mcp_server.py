@@ -30,8 +30,27 @@ def setup_paths():
 
 def main():
     """Start the MCP server"""
-    # Set environment variable for backend API URL before setting up paths
-    os.environ['BACKEND_API_URL'] = 'http://localhost:8001/api'
+    # Set environment variable for backend API URL as early as possible
+    os.environ['BACKEND_API_URL'] = 'http://localhost:8000/api'
+
+    # Import settings immediately after setting environment variable to ensure it's picked up
+    import sys
+    from pathlib import Path
+    current_dir = Path(__file__).parent
+    phase3_dir = current_dir
+
+    # Add phase-3 directory to path for settings import
+    if str(phase3_dir) not in sys.path:
+        sys.path.insert(0, str(phase3_dir))
+
+    # Force reimport of settings to pick up the environment variable
+    import importlib
+    try:
+        import config.settings
+        importlib.reload(config.settings)
+    except ImportError:
+        # If settings module doesn't exist yet, continue normally
+        pass
 
     setup_paths()
 
@@ -41,7 +60,7 @@ def main():
 
         # Start the server using uvicorn
         import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=8002, reload=False)
+        uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)
 
     except Exception as e:
         print(f"Error starting MCP server: {e}")

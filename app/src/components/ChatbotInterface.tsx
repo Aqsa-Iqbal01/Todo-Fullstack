@@ -88,22 +88,48 @@ const ChatbotInterface = () => {
     setIsLoading(true);
 
     try {
+      // Get token from multiple sources as fallback
+      let authToken = token;
+
+      // If token is not available from SessionContext, try localStorage
+      if (!authToken) {
+        authToken = localStorage.getItem('token');
+      }
+
+      // If still no token, try to get from sessionStorage
+      if (!authToken) {
+        authToken = sessionStorage.getItem('token');
+      }
+
       // Check if token exists before making the request
-      if (!token) {
+      if (!authToken) {
         throw new Error('No authentication token found. Please log in first.');
       }
+
+      // Ensure the token is properly formatted (remove any extra whitespace or prefixes)
+      let cleanAuthToken = authToken.trim();
+      if (cleanAuthToken.startsWith('Bearer ')) {
+        cleanAuthToken = cleanAuthToken.substring(7).trim();
+      } else if (cleanAuthToken.toLowerCase().startsWith('bearer ')) {
+        cleanAuthToken = cleanAuthToken.substring(6).trim();
+      }
+
+      // Log the token being used for debugging (remove in production)
+      console.log('Sending request to chatbot with token (length):', cleanAuthToken.length);
 
       // Call the chatbot API route (which will eventually connect to the backend)
       const response = await fetch('/api/chatbot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${cleanAuthToken}`
         },
         body: JSON.stringify({
           message: inputText
         })
       });
+
+      console.log('Chatbot API response status:', response.status);
 
       const data = await response.json();
 
@@ -114,21 +140,58 @@ const ChatbotInterface = () => {
         const operationResult = data.response?.operation_result;
         const intentProcessed = data.response?.intent_processed;
 
+        // Extract todos from various possible response locations
+        let todosFromResponse = null;
+        if (data.response?.operation_result?.todos) {
+          todosFromResponse = data.response?.operation_result?.todos;
+        } else if (Array.isArray(data.response?.operation_result) && data.response?.operation_result.length > 0) {
+          // Check if operation_result itself is an array of todos
+          todosFromResponse = data.response?.operation_result;
+        } else if (data.response?.operation_result && typeof data.response?.operation_result === 'object' && 'data' in data.response?.operation_result) {
+          // Check if operation_result has a 'data' property containing todos
+          todosFromResponse = data.response?.operation_result?.data;
+        } else {
+          // Fallback: check if operation_result itself contains todo properties
+          todosFromResponse = null;
+        }
+
         // Create bot response
+        let responseText = data.response?.message || data.message || 'I processed your request successfully!';
+
+        // If this is a READ_TODOS operation and we have todos, show them in a structured way
+        if (intentProcessed === 'READ_TODOS' && Array.isArray(todosFromResponse) && todosFromResponse.length > 0) {
+          // Add structured todo list to the response
+          const todoListText = '\n\n📋 Your Todo List:\n' +
+                              todosFromResponse.map((todo: any, index: number) =>
+                                `${index + 1}. ${todo.title || todo.name || 'Untitled'}${todo.completed || todo.status === 'COMPLETED' ? ' ✅' : ' ❌'}`
+                              ).join('\n');
+          responseText += todoListText;
+        }
+
         botResponse = {
           id: Date.now().toString(),
-          text: data.response?.message || data.message || 'I processed your request successfully!',
+          text: responseText,
           sender: 'bot',
           timestamp: new Date()
         };
 
         // Trigger dashboard refresh if this operation affects the todo list
+        // We'll refresh for any successful operation that modifies the todo list
         if (intentProcessed &&
-            (intentProcessed.includes('CREATE_TODO') ||
+            (intentProcessed === 'CREATE_TODO' ||
+             intentProcessed === 'UPDATE_TODO' ||
+             intentProcessed === 'DELETE_TODO' ||
+             intentProcessed.includes('CREATE_TODO') ||
              intentProcessed.includes('UPDATE_TODO') ||
              intentProcessed.includes('DELETE_TODO'))) {
+          // Save timestamp of the update to localStorage
+          localStorage.setItem('lastTodoUpdate', new Date().toISOString());
+
           // Dispatch a custom event to notify the dashboard to refresh
           window.dispatchEvent(new CustomEvent('todosUpdated', { detail: { operation: intentProcessed } }));
+        } else if (intentProcessed === 'READ_TODOS') {
+          // Even for read operations, we should update the timestamp so the dashboard knows it's up to date
+          localStorage.setItem('lastTodoUpdate', new Date().toISOString());
         }
       } else {
         // Handle different possible error structures
