@@ -76,7 +76,7 @@ def create_db_and_tables():
     except Exception as e:
         print(f"Warning: Could not create tables: {e}")
         # In serverless environments, table creation might fail due to read-only filesystem
-        # This is expected in Vercel deployments with external databases
+        # This is expected in Vercel deployments with external database
 
 # For compatibility with existing code, provide engine as a function
 def get_global_engine():
