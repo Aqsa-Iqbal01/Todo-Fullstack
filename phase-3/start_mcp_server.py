@@ -31,7 +31,9 @@ def setup_paths():
 def main():
     """Start the MCP server"""
     # Set environment variable for backend API URL before setting up paths
-    os.environ['BACKEND_API_URL'] = 'http://localhost:8001/api'
+    # Load from environment or use default
+    if not os.getenv('BACKEND_API_URL'):
+        os.environ['BACKEND_API_URL'] = 'http://localhost:8004/api'
 
     setup_paths()
 
@@ -41,7 +43,8 @@ def main():
 
         # Start the server using uvicorn
         import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=8002, reload=False)
+        from config.settings import settings
+        uvicorn.run(app, host="0.0.0.0", port=settings.mcp_port, reload=False)
 
     except Exception as e:
         print(f"Error starting MCP server: {e}")
