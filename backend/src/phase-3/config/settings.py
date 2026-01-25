@@ -10,7 +10,7 @@ class Settings:
     def __init__(self):
         # API endpoints
         self.backend_api_url: str = os.getenv(
-            "BACKEND_API_URL", "http://localhost:8000/api"
+            "BACKEND_API_URL", "http://localhost:8001/api"
         )
 
         # Authentication

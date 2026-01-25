@@ -43,18 +43,8 @@ async def create_todo_tool(parameters: Dict[str, Any]) -> Dict[str, Any]:
             # Derive title from user input if not explicitly extracted
             # Remove common command words to isolate the title
             import re
-            title = user_input
-
-            # Remove common command verbs
-            title = re.sub(r'\b(add|create|make|new|put|set|need to|want to|have to|must|should)\b', '', title, flags=re.IGNORECASE)
-
-            # Remove common noun phrases related to todos
-            title = re.sub(r'\b(todo|task|item|thing|grocery|shopping|list|to my|on my|in my)\b', '', title, flags=re.IGNORECASE)
-
-            # Remove common prepositions that might remain
-            title = re.sub(r'\b(to|on|in|at|by|for|with|from)\b', '', title, flags=re.IGNORECASE)
-
-            # Clean up extra whitespace and punctuation
+            title = re.sub(r'\b(add|create|make|new|put|set)\b', '', user_input, flags=re.IGNORECASE)
+            title = re.sub(r'\b(todo|task|item|thing|grocery|shopping|list)\b', '', title, flags=re.IGNORECASE)
             title = title.strip(' ,.')
 
         # Extract other entities
@@ -66,43 +56,21 @@ async def create_todo_tool(parameters: Dict[str, Any]) -> Dict[str, Any]:
         status = "PENDING"  # Default status for new todos
 
         # Validate that we have a title
-        if not title or not title.strip():
-            # Try a more comprehensive extraction method
-            import re
-
-            # Pattern to match the main content after common commands
-            patterns = [
-                r'(?:add|create|make|new|put|set)\s+(.+?)(?:\s+to|\s+in|\s+on|\s+my|\s+the|$|,|\.|and)',
-                r'(?:add|create|make|new|put|set)\s+(.+)',
-                r'(?:buy|get|do|finish|complete|call|send|order|prepare|schedule|attend|watch|read|write)\s+(.+?)(?:\s+by|\s+for|\s+on|\s+at|\s+to|\s+from|\s+before|\s+after|,|\.|$)',
-            ]
-
-            for pattern in patterns:
-                match = re.search(pattern, user_input, re.IGNORECASE)
-                if match:
-                    extracted_title = match.group(1).strip()
-                    if extracted_title and len(extracted_title) > 0:
-                        title = extracted_title
-                        break
-
-        # Final validation
-        if not title or not title.strip():
+        if not title:
             return {
                 "success": False,
-                "error": f"Could not determine a title for the new todo from your input: '{user_input}'. Please try a format like 'Add [your task] to my list'.",
+                "error": "Could not determine a title for the new todo from your input",
                 "original_input": user_input,
                 "extracted_entities": entities
             }
-
-        # Clean up the title
-        title = title.strip().strip('.,!?').strip()
 
         # Call the todo service to create the todo
         result = await todo_service.create_todo(
             title=title,
             description=description,
             due_date=due_date,
-            completed=False,  # New todos are not completed by default
+            status=status,
+            priority=priority,
             auth_token=auth_token
         )
 
@@ -111,7 +79,6 @@ async def create_todo_tool(parameters: Dict[str, Any]) -> Dict[str, Any]:
                 "success": True,
                 "message": f"I've added '{title}' to your todo list.",
                 "todo": result["data"],
-                "operation_result": result["data"],  # Add this to match other tools
                 "action_taken": "create_todo",
                 "original_input": user_input
             }
