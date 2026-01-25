@@ -1,15 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "src/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "runtime": "python3.11",
-        "includeFiles": ["requirements.txt"]
-      }
+  "functions": {
+    "src/main.py": {
+      "runtime": "python3.11",
+      "maxDuration": 60
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
@@ -19,10 +15,5 @@
       "src": "/(.*)",
       "dest": "src/main.py"
     }
-  ],
-  "functions": {
-    "src/main.py": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
