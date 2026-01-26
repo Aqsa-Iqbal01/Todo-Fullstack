@@ -2,16 +2,10 @@
 
 // Use backend API for production, with fallback to mock routes when backend is not available
 // For Vercel deployment, use proxy to avoid mixed content issues
-let API_BASE_URL = '';
-
-if (typeof window === 'undefined') {
-  // Server-side rendering
-  API_BASE_URL = process.env.VERCEL_ENV ? '/api/proxy' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000');
-} else {
-  // Client-side
-  const isOnVercel = window.location.hostname.includes('vercel.app');
-  API_BASE_URL = isOnVercel ? '/api/proxy' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000');
-}
+const isDeployed = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+const API_BASE_URL = isDeployed
+  ? '/api/proxy' // Use proxy when deployed to avoid mixed content
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'); // Use env var or localhost for dev
 
 /**
  * Function to make authenticated API requests

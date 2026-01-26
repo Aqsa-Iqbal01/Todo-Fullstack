@@ -1,150 +1,116 @@
 import { NextRequest } from 'next/server';
 
-// Generic proxy route to handle various API calls
-export async function GET(request: NextRequest) {
-  try {
-    const url = new URL(request.url);
-    const path = url.pathname.replace('/api/proxy', ''); // Extract the API path
+// Get the target API URL from environment variables
+// This should point to your Hugging Face backend URL
+const TARGET_API_URL = process.env.HF_BACKEND_URL ||
+                      process.env.NEXT_PUBLIC_HF_BACKEND_URL ||
+                      process.env.NEXT_PUBLIC_API_BASE_URL ||
+                      '';
 
-    const backendUrl = process.env.BACKEND_URL || 'https://aqsa-iqbal-application-todo.hf.space';
-    const fullUrl = `${backendUrl}${path}`;
-
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-
-    const response = await fetch(fullUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-    });
-
-    // Handle the response based on content type
-    const contentType = response.headers.get('content-type');
-    let data;
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      // If not JSON, return the text response
-      data = await response.text();
-    }
-
-    return Response.json(data, { status: response.status });
-  } catch (error) {
-    console.error('Proxy error:', error);
-    return Response.json({ error: 'Failed to fetch data' }, { status: 500 });
-  }
+if (!TARGET_API_URL) {
+  console.warn('HF_BACKEND_URL, NEXT_PUBLIC_HF_BACKEND_URL, or NEXT_PUBLIC_API_BASE_URL environment variable is not set');
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const url = new URL(request.url);
-    const path = url.pathname.replace('/api/proxy', ''); // Extract the API path
-
-    const backendUrl = process.env.BACKEND_URL || 'https://aqsa-iqbal-application-todo.hf.space';
-    const fullUrl = `${backendUrl}${path}`;
-
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const body = await request.json();
-
-    const response = await fetch(fullUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
-
-    // Handle the response based on content type
-    const contentType = response.headers.get('content-type');
-    let data;
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      // If not JSON, return the text response
-      data = await response.text();
-    }
-
-    return Response.json(data, { status: response.status });
-  } catch (error) {
-    console.error('Proxy error:', error);
-    return Response.json({ error: 'Failed to post data' }, { status: 500 });
-  }
+export async function GET(req: NextRequest) {
+  return handleProxyRequest(req);
 }
 
-export async function PUT(request: NextRequest) {
-  try {
-    const url = new URL(request.url);
-    const path = url.pathname.replace('/api/proxy', ''); // Extract the API path
-
-    const backendUrl = process.env.BACKEND_URL || 'https://aqsa-iqbal-application-todo.hf.space';
-    const fullUrl = `${backendUrl}${path}`;
-
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const body = await request.json();
-
-    const response = await fetch(fullUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
-
-    // Handle the response based on content type
-    const contentType = response.headers.get('content-type');
-    let data;
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      // If not JSON, return the text response
-      data = await response.text();
-    }
-
-    return Response.json(data, { status: response.status });
-  } catch (error) {
-    console.error('Proxy error:', error);
-    return Response.json({ error: 'Failed to update data' }, { status: 500 });
-  }
+export async function POST(req: NextRequest) {
+  return handleProxyRequest(req);
 }
 
-export async function DELETE(request: NextRequest) {
+export async function PUT(req: NextRequest) {
+  return handleProxyRequest(req);
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleProxyRequest(req);
+}
+
+export async function PATCH(req: NextRequest) {
+  return handleProxyRequest(req);
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+async function handleProxyRequest(req: NextRequest) {
+  if (!TARGET_API_URL) {
+    return Response.json(
+      { error: 'Backend API URL is not configured' },
+      { status: 500 }
+    );
+  }
+
   try {
-    const url = new URL(request.url);
-    const path = url.pathname.replace('/api/proxy', ''); // Extract the API path
+    // Extract the path from the original request
+    const url = new URL(req.url);
+    const pathname = url.pathname.replace('/api/proxy', ''); // Remove proxy prefix
+    const queryString = url.search;
 
-    const backendUrl = process.env.BACKEND_URL || 'https://aqsa-iqbal-application-todo.hf.space';
-    const fullUrl = `${backendUrl}${path}`;
+    // Construct the target URL - ensure it doesn't have duplicate /api segments
+    let targetUrl = `${TARGET_API_URL}${pathname}${queryString}`;
 
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    // If pathname already starts with /api and TARGET_API_URL ends with a path that includes /api,
+    // avoid duplication
+    if (TARGET_API_URL.includes('.space') && pathname.startsWith('/api')) {
+      // For Hugging Face spaces, the backend might already be configured to handle /api routes
+      targetUrl = `${TARGET_API_URL}${pathname}${queryString}`;
+    }
 
-    const response = await fetch(fullUrl, {
-      method: 'DELETE',
+    // Prepare headers for the target request
+    const headers: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      // Forward all headers except for hop-by-hop headers that shouldn't be forwarded
+      if (!['host', 'connection', 'upgrade', 'keep-alive'].includes(key.toLowerCase())) {
+        headers[key] = value;
+      }
+    });
+
+    // Make the request to the target API
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? await req.blob() : undefined,
+    });
+
+    // Clone the response to read it safely
+    const responseClone = response.clone();
+
+    // Get response body - handle potential empty responses
+    let responseBody;
+    try {
+      responseBody = await responseClone.blob();
+    } catch (e) {
+      // If there's an error reading the body, return an empty response
+      responseBody = new Blob([]);
+    }
+
+    // Create response with appropriate headers
+    const proxyResponse = new Response(responseBody, {
+      status: response.status,
       headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        'Content-Type': response.headers.get('Content-Type') || 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
 
-    // Handle the response based on content type
-    const contentType = response.headers.get('content-type');
-    let data;
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      // If not JSON, return the text response
-      data = await response.text();
-    }
-
-    return Response.json(data, { status: response.status });
+    return proxyResponse;
   } catch (error) {
     console.error('Proxy error:', error);
-    return Response.json({ error: 'Failed to delete data' }, { status: 500 });
+    return Response.json(
+      { error: 'Proxy request failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
