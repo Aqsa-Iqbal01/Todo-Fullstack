@@ -59,10 +59,11 @@ async function handleProxyRequest(req: NextRequest) {
     // Remove the /api/proxy prefix to get the actual API path
     if (pathname.startsWith('/api/proxy')) {
       pathname = pathname.replace('/api/proxy', '');
-      // Ensure there's a leading slash if pathname is not empty
+      // Ensure there's a leading slash if pathname is not empty after replacement
       if (pathname && !pathname.startsWith('/')) {
         pathname = '/' + pathname;
-      } else if (!pathname) {
+      } else if (!pathname || pathname === '/') {
+        // If pathname is empty or just '/', set it to '/' to hit the root of the target API
         pathname = '/';
       }
     }
