@@ -105,6 +105,6 @@ export async function DELETE(request: NextRequest) {
     return Response.json(data, { status: response.status });
   } catch (error) {
     console.error('Proxy error:', error);
-    return Response.json({ error: 'Failed to delete data' }, { status: response.status });
+    return Response.json({ error: 'Failed to delete data' }, { status: 500 });
   }
 }
