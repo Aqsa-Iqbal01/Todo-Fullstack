@@ -12,7 +12,7 @@ async def test_complete_workflow():
     """
     print("Testing complete chatbot workflow...")
     
-    # Set the correct backend URL
+    # Set the correct backend URL.
     os.environ['BACKEND_API_URL'] = 'http://localhost:8004/api'
     
     print("\nPrerequisites to run this test:")
