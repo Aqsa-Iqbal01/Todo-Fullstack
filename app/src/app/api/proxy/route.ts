@@ -44,27 +44,33 @@ export async function OPTIONS(req: NextRequest) {
 
 async function handleProxyRequest(req: NextRequest) {
   if (!TARGET_API_URL) {
-    return Response.json(
-      { error: 'Backend API URL is not configured' },
-      { status: 500 }
-    );
+    console.error('Backend API URL is not configured');
+    return new Response(JSON.stringify({ error: 'Backend API URL is not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
     // Extract the path from the original request
     const url = new URL(req.url);
-    const pathname = url.pathname.replace('/api/proxy', ''); // Remove proxy prefix
-    const queryString = url.search;
+    let pathname = url.pathname;
 
-    // Construct the target URL - ensure it doesn't have duplicate /api segments
-    let targetUrl = `${TARGET_API_URL}${pathname}${queryString}`;
-
-    // If pathname already starts with /api and TARGET_API_URL ends with a path that includes /api,
-    // avoid duplication
-    if (TARGET_API_URL.includes('.space') && pathname.startsWith('/api')) {
-      // For Hugging Face spaces, the backend might already be configured to handle /api routes
-      targetUrl = `${TARGET_API_URL}${pathname}${queryString}`;
+    // Remove the /api/proxy prefix to get the actual API path
+    if (pathname.startsWith('/api/proxy')) {
+      pathname = pathname.replace('/api/proxy', '');
+      // Ensure there's a leading slash if pathname is not empty
+      if (pathname && !pathname.startsWith('/')) {
+        pathname = '/' + pathname;
+      } else if (!pathname) {
+        pathname = '/';
+      }
     }
+
+    const queryString = url.search;
+    const targetUrl = `${TARGET_API_URL}${pathname}${queryString}`;
+
+    console.log(`Proxying request: ${req.method} ${targetUrl}`);
 
     // Prepare headers for the target request
     const headers: Record<string, string> = {};
@@ -82,16 +88,15 @@ async function handleProxyRequest(req: NextRequest) {
       body: req.method !== 'GET' && req.method !== 'HEAD' ? await req.blob() : undefined,
     });
 
-    // Clone the response to read it safely
-    const responseClone = response.clone();
+    console.log(`Target response status: ${response.status}`);
 
-    // Get response body - handle potential empty responses
+    // Get the response body
     let responseBody;
     try {
-      responseBody = await responseClone.blob();
+      responseBody = await response.text(); // Use text() to handle both JSON and non-JSON responses
     } catch (e) {
-      // If there's an error reading the body, return an empty response
-      responseBody = new Blob([]);
+      console.error('Error reading response body:', e);
+      responseBody = '{}'; // Default empty JSON object if there's an error
     }
 
     // Create response with appropriate headers
@@ -108,9 +113,12 @@ async function handleProxyRequest(req: NextRequest) {
     return proxyResponse;
   } catch (error) {
     console.error('Proxy error:', error);
-    return Response.json(
-      { error: 'Proxy request failed', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({
+      error: 'Proxy request failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
