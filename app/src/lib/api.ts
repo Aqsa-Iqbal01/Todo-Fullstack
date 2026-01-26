@@ -1,10 +1,47 @@
 // lib/api.ts
 
 /**
- * Todo API – frontend ALWAYS talks to Next.js API routes
- * (never directly to HuggingFace backend)
+ * ======================
+ * AUTH API
+ * ======================
  */
+export const authAPI = {
+  login: (email: string, password: string) => {
+    return fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+  },
 
+  register: (email: string, password: string) => {
+    return fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  logout: () => {
+    const token = localStorage.getItem('token');
+    return fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+};
+
+/**
+ * ======================
+ * TODO API
+ * ======================
+ */
 export const todoAPI = {
   getTodos: () => {
     const token = localStorage.getItem('token');
