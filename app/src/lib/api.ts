@@ -1,9 +1,17 @@
 // API utility functions for the Todo App
 
 // Use backend API for production, with fallback to mock routes when backend is not available
-// For Vercel deployment, use relative paths to ensure HTTPS-to-HTTPS communication
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (typeof window !== 'undefined' ? '' : 'http://localhost:8000'); // Empty string means relative to current domain
+// For Vercel deployment, use proxy to avoid mixed content issues
+let API_BASE_URL = '';
+
+if (typeof window === 'undefined') {
+  // Server-side rendering
+  API_BASE_URL = process.env.VERCEL_ENV ? '/api/proxy' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000');
+} else {
+  // Client-side
+  const isOnVercel = window.location.hostname.includes('vercel.app');
+  API_BASE_URL = isOnVercel ? '/api/proxy' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000');
+}
 
 /**
  * Function to make authenticated API requests
