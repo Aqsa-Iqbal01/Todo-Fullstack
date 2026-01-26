@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const path = url.pathname.split('/api/proxy/auth')[1]; // Extract the specific auth path
+    const path = url.pathname.split('/api/proxy/auth')[1]; 
 
     const backendUrl = process.env.BACKEND_URL || 'https://aqsa-iqbal-application-todo.hf.space';
     const fullUrl = `${backendUrl}/api/auth${path}`;
