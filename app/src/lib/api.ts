@@ -1,7 +1,9 @@
 // API utility functions for the Todo App
 
 // Use backend API for production, with fallback to mock routes when backend is not available
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// For Vercel deployment, use relative paths to ensure HTTPS-to-HTTPS communication
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window !== 'undefined' ? '' : 'http://localhost:8000'); // Empty string means relative to current domain
 
 /**
  * Function to make authenticated API requests
