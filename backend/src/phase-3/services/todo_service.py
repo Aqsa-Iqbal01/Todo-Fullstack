@@ -56,14 +56,14 @@ class TodoService:
             }
 
         # Call the API adapter to create the todo
+        # Note: The API adapter now uses direct service calls and only supports
+        # title, description, due_date, and auth_token (status, priority, tags not supported)
         result = await self.api_adapter.create_todo(
             title=title,
             description=description,
             due_date=due_date,
-            status=status,
-            priority=priority,
-            tags=tags or [],
             auth_token=auth_token
+            # status, priority, and tags are not supported by the TodoCreate model
         )
 
         return result
@@ -117,9 +117,8 @@ class TodoService:
             title=title,
             description=description,
             due_date=due_date,
-            status=status,
-            priority=priority,
             auth_token=auth_token
+            # status and priority are not supported by the TodoUpdate model
         )
 
         return result

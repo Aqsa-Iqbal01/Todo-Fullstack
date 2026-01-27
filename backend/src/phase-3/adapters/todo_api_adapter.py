@@ -94,13 +94,13 @@ class TodoAPIAdapter:
                     }
 
                 # Create todo using the direct service
+                # Note: TodoCreate model only supports title, description, completed, and due_date
+                # Status and priority are not supported in the model
                 todo_create = TodoCreate(
                     title=title,
                     description=description,
-                    due_date=due_date,
-                    status=status,
-                    priority=priority,
-                    tags=tags
+                    due_date=due_date
+                    # completed is not passed here since it defaults to False
                 )
 
                 todo_service = DirectTodoService(session)

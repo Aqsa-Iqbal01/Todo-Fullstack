@@ -30,33 +30,42 @@ if original_phase_3_dir not in sys.path:
     sys.path.insert(0, original_phase_3_dir)
 
 # Now import the chat interface
+# First try the phase-3 chatbot module
 try:
-    from chatbot.chat_interface import chat_interface
+    from phase_3.chatbot.chat_interface import chat_interface
 except ImportError as e:
-    print(f"Error importing chat_interface: {e}")
-    print("Attempting to load with alternative path setup...")
-
-    # Try adding more path variations
-    alt_phase_3_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'phase-3')
-    if os.path.exists(alt_phase_3_dir) and alt_phase_3_dir not in sys.path:
-        sys.path.insert(0, alt_phase_3_dir)
+    print(f"Error importing chat_interface from phase_3: {e}")
+    print("Attempting to load from alternate path...")
 
     try:
-        from chatbot.chat_interface import chat_interface
-    except ImportError:
-        print("Error: Could not import chat_interface from phase-3. Creating mock interface.")
-        # Create a mock interface if import fails
-        class MockChatInterface:
-            async def process_user_input(self, user_input: str, auth_token: str, conversation_id: str = None):
-                return {
-                    "success": False,
-                    "message": "Chatbot service is currently unavailable. Please check if the phase-3 components are properly set up.",
-                    "intent": "ERROR",
-                    "entities": {},
-                    "error": "Import error - service unavailable"
-                }
+        # Try with the relative path from the current file location
+        from ..phase_3.chatbot.chat_interface import chat_interface
+    except ImportError as e2:
+        print(f"Error importing chat_interface from relative path: {e2}")
+        print("Attempting to load with alternative path setup...")
 
-        chat_interface = MockChatInterface()
+        # Try adding more path variations
+        alt_phase_3_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'phase-3')
+        if os.path.exists(alt_phase_3_dir) and alt_phase_3_dir not in sys.path:
+            sys.path.insert(0, alt_phase_3_dir)
+
+        try:
+            from chatbot.chat_interface import chat_interface
+        except ImportError as e3:
+            print(f"Final error: Could not import chat_interface. Error: {e3}")
+            print("Creating mock interface.")
+            # Create a mock interface if import fails
+            class MockChatInterface:
+                async def process_user_input(self, user_input: str, auth_token: str, conversation_id: str = None):
+                    return {
+                        "success": False,
+                        "message": "Chatbot service is currently unavailable. Please check if the phase-3 components are properly set up.",
+                        "intent": "ERROR",
+                        "entities": {},
+                        "error": "Import error - service unavailable"
+                    }
+
+            chat_interface = MockChatInterface()
 
 
 router = APIRouter()

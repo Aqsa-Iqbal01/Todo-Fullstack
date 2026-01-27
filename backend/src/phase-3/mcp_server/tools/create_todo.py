@@ -65,13 +65,14 @@ async def create_todo_tool(parameters: Dict[str, Any]) -> Dict[str, Any]:
             }
 
         # Call the todo service to create the todo
+        # Note: The service and underlying models only support title, description, due_date
+        # Status and priority are not supported by the TodoCreate model
         result = await todo_service.create_todo(
             title=title,
             description=description,
             due_date=due_date,
-            status=status,
-            priority=priority,
             auth_token=auth_token
+            # status and priority are not supported by the underlying data model
         )
 
         if result["success"]:
