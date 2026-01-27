@@ -30,10 +30,25 @@ export async function POST(req: NextRequest) {
     }
 
     // Forward the request to the backend's logout endpoint
+    // Handle redirects manually to preserve auth headers
     const response = await fetch(`${BACKEND_API_URL}/api/auth/logout`, {
       method: 'POST',
-      headers: headers
+      headers: headers,
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually to preserve auth headers
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'POST',
+          headers: headers
+        });
+        return redirectResponse;
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

@@ -36,11 +36,27 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     // Forward the request to the backend's todos endpoint (with trailing slash)
+    // Handle redirects manually to preserve auth headers
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
       method: 'PUT',
       headers: headers,
-      body: JSON.stringify(todoData)
+      body: JSON.stringify(todoData),
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually to preserve auth headers
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(todoData)
+        });
+        return redirectResponse;
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -100,10 +116,25 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     // Forward the request to the backend's todos endpoint (with trailing slash)
+    // Handle redirects manually to preserve auth headers
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
       method: 'DELETE',
-      headers: headers
+      headers: headers,
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually to preserve auth headers
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'DELETE',
+          headers: headers
+        });
+        return redirectResponse;
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -163,10 +194,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     // Forward the request to the backend's todos toggle endpoint (with trailing slash)
+    // Handle redirects manually to preserve auth headers
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle/`, {
       method: 'PATCH',
-      headers: headers
+      headers: headers,
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually to preserve auth headers
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'PATCH',
+          headers: headers
+        });
+        return redirectResponse;
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

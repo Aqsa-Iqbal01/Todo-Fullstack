@@ -16,8 +16,28 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         email: email,
         password: password
-      })
+      }),
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password
+          })
+        });
+        return redirectResponse;
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

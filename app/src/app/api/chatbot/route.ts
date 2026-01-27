@@ -41,8 +41,28 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         message: message
-      })
+      }),
+      redirect: 'manual'
     });
+
+    // If there's a redirect, handle it manually to preserve auth headers
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (location) {
+        // Follow the redirect manually with the same headers
+        const redirectResponse = await fetch(location, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+        return redirectResponse;
+      }
+    }
 
     const data = await response.json();
 
