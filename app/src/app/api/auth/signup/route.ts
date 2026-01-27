@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password } = await req.json();
 
     // Get the backend API URL from environment variables
     const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aqsa-iqbal-application-todo.hf.space';
@@ -15,8 +15,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         email: email,
-        password: password,
-        name: name
+        password: password
       }),
       redirect: 'manual'
     });
@@ -33,8 +32,7 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             email: email,
-            password: password,
-            name: name
+            password: password
           })
         });
         return redirectResponse;
