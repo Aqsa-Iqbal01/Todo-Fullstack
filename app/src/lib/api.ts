@@ -1,111 +1,114 @@
 // API utility functions for the Todo App
 
-// Use local API routes for production to avoid mixed content issues
+// All API calls go through local routes to avoid mixed content issues
 // The local API routes will proxy requests to the backend
-const API_BASE_URL = '';
-
-/**
- * Function to make authenticated API requests
- */
-export const authenticatedRequest = async (
-  endpoint: string,
-  options: RequestInit = {}
-) => {
-  const token = localStorage.getItem('token');
-
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  if (token) {
-    (headers as any)['Authorization'] = `Bearer ${token}`;
-  }
-
-    let url = `${API_BASE_URL}${endpoint}`; // Use base URL for all API routes
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  return response;
-};
-
-/**
- * Function to make unauthenticated API requests
- */
-export const unauthenticatedRequest = async (
-  endpoint: string,
-  options: RequestInit = {}
-) => {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-    let url = `${API_BASE_URL}${endpoint}`; // Use base URL for all API routes
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  return response;
-};
 
 // Auth API functions
 export const authAPI = {
   login: async (email: string, password: string) => {
-    return unauthenticatedRequest('/api/auth/login', {
+    // Use local API route to avoid mixed content issues
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email, password }),
     });
+    return response;
   },
 
   register: async (email: string, password: string) => {
-    return unauthenticatedRequest('/api/auth/register', {
+    // Use local API route to avoid mixed content issues
+    const response = await fetch('/api/auth/signup', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email, password }),
     });
+    return response;
   },
 
   logout: async () => {
-    return authenticatedRequest('/api/auth/logout', {
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/auth/logout', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
     });
+    return response;
   },
 };
 
 // Todo API functions
 export const todoAPI = {
   getTodos: async () => {
-    return authenticatedRequest('/api/todos');
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/todos', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response;
   },
 
   createTodo: async (todoData: any) => {
-    return authenticatedRequest('/api/todos', {
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/todos', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify(todoData),
     });
+    return response;
   },
 
   updateTodo: async (id: string, todoData: any) => {
-    return authenticatedRequest(`/api/todos/${id}`, {
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/todos/${id}`, {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify(todoData),
     });
+    return response;
   },
 
   deleteTodo: async (id: string) => {
-    return authenticatedRequest(`/api/todos/${id}`, {
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/todos/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
     });
+    return response;
   },
 
   toggleTodo: async (id: string) => {
-    return authenticatedRequest(`/api/todos/${id}/toggle`, {
+    // Use local API route to avoid mixed content issues
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/todos/${id}/toggle`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
     });
+    return response;
   },
 }; 
