@@ -113,7 +113,7 @@ class TodoService:
             }
 
         result = await self.api_adapter.update_todo(
-            todo_id=todo_id,
+            todo_id=todo_id,  # This will be converted to UUID in the adapter
             title=title,
             description=description,
             due_date=due_date,

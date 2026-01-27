@@ -4,11 +4,11 @@ This module handles communication with the Phase II backend APIs
 to perform todo operations.
 """
 
-import httpx
 import asyncio
 from typing import Dict, Any, List, Optional
 import sys
 import os
+from datetime import datetime
 
 # Add the phase-3 directory to the path to allow absolute imports
 phase3_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -16,6 +16,15 @@ if phase3_dir not in sys.path:
     sys.path.insert(0, phase3_dir)
 
 from config.settings import settings
+
+# Import the direct service modules instead of making HTTP requests
+from ..database.database import get_engine
+from ..models.user import User
+from ..models.todo import Todo, TodoCreate, TodoUpdate
+from ..services.todo_service import TodoService as DirectTodoService
+from sqlmodel import Session, select
+from ..auth.auth_handler import get_current_user
+import uuid
 
 
 class TodoAPIAdapter:
@@ -28,7 +37,7 @@ class TodoAPIAdapter:
                          status: str = "PENDING", priority: str = "MEDIUM", tags: List[str] = None,
                          auth_token: str = "") -> Dict[str, Any]:
         """
-        Create a new todo via the backend API
+        Create a new todo via direct service call
 
         Args:
             title: Title of the todo
@@ -45,15 +54,21 @@ class TodoAPIAdapter:
         if tags is None:
             tags = []
 
-        url = f"{self.base_url}/todos/"
+        try:
+            # Validate inputs
+            if not title or len(title.strip()) == 0:
+                return {
+                    "success": False,
+                    "error": "Todo title cannot be empty"
+                }
 
-        headers = {
-            "Content-Type": "application/json",
-        }
+            # Authenticate user from token
+            if not auth_token or not auth_token.strip():
+                return {
+                    "success": False,
+                    "error": "Authentication token is required"
+                }
 
-        # Add Authorization header if token is valid
-        # Ensure token is not empty, None, or just whitespace
-        if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
             if clean_token.startswith('Bearer '):
@@ -61,57 +76,46 @@ class TodoAPIAdapter:
             elif clean_token.startswith('bearer '):
                 clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
 
-            headers["Authorization"] = f"Bearer {clean_token}"
-            print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
-        else:
-            print(f"DEBUG: auth_token is empty or invalid: '{auth_token}'")
-            print(f"DEBUG: auth_token type: {type(auth_token)}")
-            print(f"DEBUG: This may cause authentication failure when calling {url}")
+            # Get current user from token
+            current_user_email = get_current_user(clean_token)
+            if not current_user_email:
+                return {
+                    "success": False,
+                    "error": "Authentication failed: Invalid or expired token. Please log in again."
+                }
 
-        payload = {
-            "title": title,
-            "description": description,
-            "due_date": due_date,
-            "status": status,
-            "priority": priority,
-            "tags": tags
-        }
-
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(url, json=payload, headers=headers)
-
-                if response.status_code in [200, 201]:
+            # Get user from database
+            with Session(get_engine()) as session:
+                user = session.exec(select(User).where(User.email == current_user_email)).first()
+                if not user:
                     return {
-                        "success": True,
-                        "data": response.json(),
-                        "status_code": response.status_code
+                        "success": False,
+                        "error": "User not found"
                     }
-                else:
-                    # Log detailed error information for debugging
-                    print(f"DEBUG: API call failed with status {response.status_code}")
-                    print(f"DEBUG: Response text: {response.text}")
-                    print(f"DEBUG: Request URL: {url}")
-                    print(f"DEBUG: Headers sent: {dict(headers)}")  # Don't print the actual token for security
 
-                    if response.status_code == 401:
-                        return {
-                            "success": False,
-                            "error": "Authentication failed: Invalid or expired token. Please log in again.",
-                            "status_code": response.status_code,
-                            "data": response.text
-                        }
-                    else:
-                        return {
-                            "success": False,
-                            "error": f"Failed to create todo: {response.text}",
-                            "status_code": response.status_code,
-                            "data": response.text
-                        }
-        except httpx.RequestError as e:
+                # Create todo using the direct service
+                todo_create = TodoCreate(
+                    title=title,
+                    description=description,
+                    due_date=due_date,
+                    status=status,
+                    priority=priority,
+                    tags=tags
+                )
+
+                todo_service = DirectTodoService(session)
+                created_todo = todo_service.create_todo(todo_create, user.id)
+
+                return {
+                    "success": True,
+                    "data": created_todo,
+                    "status_code": 200
+                }
+
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Request error: {str(e)}",
+                "error": f"Failed to create todo: {str(e)}",
                 "status_code": None
             }
 
@@ -126,13 +130,14 @@ class TodoAPIAdapter:
         Returns:
             Response from the backend API
         """
-        url = f"{self.base_url}/todos/"
+        try:
+            # Authenticate user from token
+            if not auth_token or not auth_token.strip():
+                return {
+                    "success": False,
+                    "error": "Authentication token is required"
+                }
 
-        headers = {}
-
-        # Add Authorization header if token is valid
-        # Ensure token is not empty, None, or just whitespace
-        if auth_token and auth_token.strip():
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
             if clean_token.startswith('Bearer '):
@@ -140,53 +145,50 @@ class TodoAPIAdapter:
             elif clean_token.startswith('bearer '):
                 clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
 
-            headers["Authorization"] = f"Bearer {clean_token}"
-            print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
-        else:
-            print(f"DEBUG: auth_token is empty or invalid: '{auth_token}'")
-            print(f"DEBUG: auth_token type: {type(auth_token)}")
-            print(f"DEBUG: This may cause authentication failure when calling {url}")
+            # Get current user from token
+            current_user_email = get_current_user(clean_token)
+            if not current_user_email:
+                return {
+                    "success": False,
+                    "error": "Authentication failed: Invalid or expired token. Please log in again."
+                }
 
-        params = {}
-        if status_filter:
-            params["status"] = status_filter
-
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(url, headers=headers, params=params)
-
-                if response.status_code == 200:
-                    todos = response.json()
-
-                    # Apply additional filtering if needed
-                    if status_filter:
-                        todos = [todo for todo in todos if todo.get('status', '').lower() == status_filter.lower()]
-
-                    return {
-                        "success": True,
-                        "data": todos,
-                        "status_code": response.status_code
-                    }
-                else:
+            # Get user from database
+            with Session(get_engine()) as session:
+                user = session.exec(select(User).where(User.email == current_user_email)).first()
+                if not user:
                     return {
                         "success": False,
-                        "error": f"Failed to retrieve todos: {response.text}",
-                        "status_code": response.status_code,
-                        "data": response.text
+                        "error": "User not found"
                     }
-        except httpx.RequestError as e:
+
+                # Get todos using the direct service
+                todo_service = DirectTodoService(session)
+                todos = todo_service.get_user_todos(user.id)
+
+                # Apply status filter if specified
+                if status_filter:
+                    todos = [todo for todo in todos if todo.status.lower() == status_filter.lower()]
+
+                return {
+                    "success": True,
+                    "data": todos,
+                    "status_code": 200
+                }
+
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Request error: {str(e)}",
+                "error": f"Failed to retrieve todos: {str(e)}",
                 "status_code": None
             }
 
-    async def update_todo(self, todo_id: int, title: Optional[str] = None,
+    async def update_todo(self, todo_id: str, title: Optional[str] = None,
                          description: Optional[str] = None, due_date: Optional[str] = None,
                          status: Optional[str] = None, priority: Optional[str] = None,
                          auth_token: str = "") -> Dict[str, Any]:
         """
-        Update an existing todo via the backend API
+        Update an existing todo via direct service call
 
         Args:
             todo_id: ID of the todo to update
@@ -200,15 +202,30 @@ class TodoAPIAdapter:
         Returns:
             Response from the backend API
         """
-        url = f"{self.base_url}/todos/{todo_id}"
+        try:
+            # Validate inputs
+            if not todo_id:
+                return {
+                    "success": False,
+                    "error": "Todo ID is required"
+                }
 
-        headers = {
-            "Content-Type": "application/json",
-        }
+            # Convert string ID to UUID
+            try:
+                todo_uuid = uuid.UUID(todo_id)
+            except ValueError:
+                return {
+                    "success": False,
+                    "error": "Invalid todo ID format"
+                }
 
-        # Add Authorization header if token is valid
-        # Ensure token is not empty, None, or just whitespace
-        if auth_token and auth_token.strip():
+            # Authenticate user from token
+            if not auth_token or not auth_token.strip():
+                return {
+                    "success": False,
+                    "error": "Authentication token is required"
+                }
+
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
             if clean_token.startswith('Bearer '):
@@ -216,52 +233,62 @@ class TodoAPIAdapter:
             elif clean_token.startswith('bearer '):
                 clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
 
-            headers["Authorization"] = f"Bearer {clean_token}"
-            print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
-        else:
-            print(f"DEBUG: auth_token is empty or invalid: '{auth_token}'")
-            print(f"DEBUG: auth_token type: {type(auth_token)}")
-            print(f"DEBUG: This may cause authentication failure when calling {url}")
+            # Get current user from token
+            current_user_email = get_current_user(clean_token)
+            if not current_user_email:
+                return {
+                    "success": False,
+                    "error": "Authentication failed: Invalid or expired token. Please log in again."
+                }
 
-        payload = {}
-        if title is not None:
-            payload["title"] = title
-        if description is not None:
-            payload["description"] = description
-        if due_date is not None:
-            payload["due_date"] = due_date
-        if status is not None:
-            payload["status"] = status
-        if priority is not None:
-            payload["priority"] = priority
+            # Get user from database
+            with Session(get_engine()) as session:
+                user = session.exec(select(User).where(User.email == current_user_email)).first()
+                if not user:
+                    return {
+                        "success": False,
+                        "error": "User not found"
+                    }
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.put(url, json=payload, headers=headers)
+                # Prepare update data - need to match the TodoUpdate model fields
+                update_data = {}
+                if title is not None:
+                    update_data["title"] = title
+                if description is not None:
+                    update_data["description"] = description
+                if due_date is not None:
+                    update_data["due_date"] = due_date
+                # Note: TodoUpdate model doesn't have status and priority fields, only completed
+                # For now, let's only update the fields that exist in TodoUpdate model
 
-                if response.status_code == 200:
+                # Update todo using the direct service
+                todo_update = TodoUpdate(**update_data)
+
+                todo_service = DirectTodoService(session)
+                updated_todo = todo_service.update_todo(todo_uuid, todo_update, user.id)
+
+                if updated_todo:
                     return {
                         "success": True,
-                        "data": response.json(),
-                        "status_code": response.status_code
+                        "data": updated_todo,
+                        "status_code": 200
                     }
                 else:
                     return {
                         "success": False,
-                        "error": f"Failed to update todo: {response.text}",
-                        "status_code": response.status_code,
-                        "data": response.text
+                        "error": "Todo not found or not authorized to update"
                     }
-        except httpx.RequestError as e:
+
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Request error: {str(e)}",
+                "error": f"Failed to update todo: {str(e)}",
                 "status_code": None
             }
 
-    async def delete_todo(self, todo_id: int, auth_token: str = "") -> Dict[str, Any]:
+    async def delete_todo(self, todo_id: str, auth_token: str = "") -> Dict[str, Any]:
         """
-        Delete a todo via the backend API
+        Delete a todo via direct service call
 
         Args:
             todo_id: ID of the todo to delete
@@ -270,13 +297,30 @@ class TodoAPIAdapter:
         Returns:
             Response from the backend API
         """
-        url = f"{self.base_url}/todos/{todo_id}"
+        try:
+            # Validate inputs
+            if not todo_id:
+                return {
+                    "success": False,
+                    "error": "Todo ID is required"
+                }
 
-        headers = {}
+            # Convert string ID to UUID
+            try:
+                todo_uuid = uuid.UUID(todo_id)
+            except ValueError:
+                return {
+                    "success": False,
+                    "error": "Invalid todo ID format"
+                }
 
-        # Add Authorization header if token is valid
-        # Ensure token is not empty, None, or just whitespace
-        if auth_token and auth_token.strip():
+            # Authenticate user from token
+            if not auth_token or not auth_token.strip():
+                return {
+                    "success": False,
+                    "error": "Authentication token is required"
+                }
+
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
             if clean_token.startswith('Bearer '):
@@ -284,38 +328,47 @@ class TodoAPIAdapter:
             elif clean_token.startswith('bearer '):
                 clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
 
-            headers["Authorization"] = f"Bearer {clean_token}"
-            print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
-        else:
-            print(f"DEBUG: auth_token is empty or invalid: '{auth_token}'")
-            print(f"DEBUG: auth_token type: {type(auth_token)}")
-            print(f"DEBUG: This may cause authentication failure when calling {url}")
+            # Get current user from token
+            current_user_email = get_current_user(clean_token)
+            if not current_user_email:
+                return {
+                    "success": False,
+                    "error": "Authentication failed: Invalid or expired token. Please log in again."
+                }
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.delete(url, headers=headers)
+            # Get user from database
+            with Session(get_engine()) as session:
+                user = session.exec(select(User).where(User.email == current_user_email)).first()
+                if not user:
+                    return {
+                        "success": False,
+                        "error": "User not found"
+                    }
 
-                if response.status_code in [200, 204]:
+                # Delete todo using the direct service
+                todo_service = DirectTodoService(session)
+                deleted = todo_service.delete_todo(todo_uuid, user.id)
+
+                if deleted:
                     return {
                         "success": True,
                         "data": None,
-                        "status_code": response.status_code
+                        "status_code": 200
                     }
                 else:
                     return {
                         "success": False,
-                        "error": f"Failed to delete todo: {response.text}",
-                        "status_code": response.status_code,
-                        "data": response.text
+                        "error": "Todo not found or not authorized to delete"
                     }
-        except httpx.RequestError as e:
+
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Request error: {str(e)}",
+                "error": f"Failed to delete todo: {str(e)}",
                 "status_code": None
             }
 
-    async def toggle_todo_status(self, todo_id: int, auth_token: str = "") -> Dict[str, Any]:
+    async def toggle_todo_status(self, todo_id: str, auth_token: str = "") -> Dict[str, Any]:
         """
         Toggle the completion status of a todo
 
@@ -326,13 +379,30 @@ class TodoAPIAdapter:
         Returns:
             Response from the backend API
         """
-        url = f"{self.base_url}/todos/{todo_id}/toggle"
+        try:
+            # Validate inputs
+            if not todo_id:
+                return {
+                    "success": False,
+                    "error": "Todo ID is required"
+                }
 
-        headers = {}
+            # Convert string ID to UUID
+            try:
+                todo_uuid = uuid.UUID(todo_id)
+            except ValueError:
+                return {
+                    "success": False,
+                    "error": "Invalid todo ID format"
+                }
 
-        # Add Authorization header if token is valid
-        # Ensure token is not empty, None, or just whitespace
-        if auth_token and auth_token.strip():
+            # Authenticate user from token
+            if not auth_token or not auth_token.strip():
+                return {
+                    "success": False,
+                    "error": "Authentication token is required"
+                }
+
             # Clean the token by removing any leading/trailing whitespace or Bearer prefix if accidentally included
             clean_token = auth_token.strip()
             if clean_token.startswith('Bearer '):
@@ -340,34 +410,43 @@ class TodoAPIAdapter:
             elif clean_token.startswith('bearer '):
                 clean_token = clean_token[7:]  # Remove 'bearer ' prefix if present
 
-            headers["Authorization"] = f"Bearer {clean_token}"
-            print(f"DEBUG: Setting authorization header with cleaned token length: {len(clean_token)}")  # Debug print
-        else:
-            print(f"DEBUG: auth_token is empty or invalid: '{auth_token}'")
-            print(f"DEBUG: auth_token type: {type(auth_token)}")
-            print(f"DEBUG: This may cause authentication failure when calling {url}")
+            # Get current user from token
+            current_user_email = get_current_user(clean_token)
+            if not current_user_email:
+                return {
+                    "success": False,
+                    "error": "Authentication failed: Invalid or expired token. Please log in again."
+                }
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.patch(url, headers=headers)
+            # Get user from database
+            with Session(get_engine()) as session:
+                user = session.exec(select(User).where(User.email == current_user_email)).first()
+                if not user:
+                    return {
+                        "success": False,
+                        "error": "User not found"
+                    }
 
-                if response.status_code == 200:
+                # Toggle todo status using the direct service
+                todo_service = DirectTodoService(session)
+                toggled_todo = todo_service.toggle_todo_completion(todo_uuid, user.id)
+
+                if toggled_todo:
                     return {
                         "success": True,
-                        "data": response.json(),
-                        "status_code": response.status_code
+                        "data": toggled_todo,
+                        "status_code": 200
                     }
                 else:
                     return {
                         "success": False,
-                        "error": f"Failed to toggle todo status: {response.text}",
-                        "status_code": response.status_code,
-                        "data": response.text
+                        "error": "Todo not found or not authorized to toggle"
                     }
-        except httpx.RequestError as e:
+
+        except Exception as e:
             return {
                 "success": False,
-                "error": f"Request error: {str(e)}",
+                "error": f"Failed to toggle todo status: {str(e)}",
                 "status_code": None
             }
 
