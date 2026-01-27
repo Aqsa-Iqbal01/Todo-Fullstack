@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     // Get the backend API URL from environment variables
     const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aqsa-iqbal-application-todo.hf.space';
 
-    // Forward the request to the backend's signup endpoint
+    
     const response = await fetch(`${BACKEND_API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
