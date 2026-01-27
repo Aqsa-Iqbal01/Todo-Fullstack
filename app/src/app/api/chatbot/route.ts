@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Get the backend API URL from environment variables
     // For chatbot functionality, default to port 8001 where the MCP chatbot backend runs
-    const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
+    const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aqsa-iqbal-application-todo.hf.space';
 
     // Forward the request to the backend's MCP-based chatbot endpoint
     const response = await fetch(`${BACKEND_API_URL}/api/chatbot`, {
