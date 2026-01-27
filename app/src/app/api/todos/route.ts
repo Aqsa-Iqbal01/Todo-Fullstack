@@ -29,26 +29,11 @@ export async function GET(req: NextRequest) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (without trailing slash to match backend expectation)
-    // Handle redirects manually to preserve auth headers
-    const response = await fetch(`${BACKEND_API_URL}/api/todos`, {
+    // Forward the request to the backend's todos endpoint (with trailing slash to match backend's final expectation)
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/`, {
       method: 'GET',
-      headers: headers,
-      redirect: 'manual'
+      headers: headers
     });
-
-    // If there's a redirect, handle it manually to preserve auth headers
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get('Location');
-      if (location) {
-        // Follow the redirect manually with the same headers
-        const redirectResponse = await fetch(location, {
-          method: 'GET',
-          headers: headers
-        });
-        return redirectResponse;
-      }
-    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -107,28 +92,12 @@ export async function POST(req: NextRequest) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (without trailing slash to match backend expectation)
-    // Ensure redirect responses also preserve authentication
-    const response = await fetch(`${BACKEND_API_URL}/api/todos`, {
+    // Forward the request to the backend's todos endpoint (with trailing slash to match backend's final expectation)
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/`, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(todoData),
-      redirect: 'manual'  // Handle redirects manually to preserve headers
+      body: JSON.stringify(todoData)
     });
-
-    // If there's a redirect, we need to handle it manually to preserve auth headers
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get('Location');
-      if (location) {
-        // Follow the redirect manually with the same headers
-        const redirectResponse = await fetch(location, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(todoData)
-        });
-        return redirectResponse;
-      }
-    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
