@@ -61,7 +61,7 @@ export const todoAPI = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch('/api/todos/', {
+    const response = await fetch('/api/todos', {
       method: 'GET',
       headers: headers,
     });
@@ -79,7 +79,7 @@ export const todoAPI = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch('/api/todos/', {
+    const response = await fetch('/api/todos', {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(todoData),
@@ -98,7 +98,7 @@ export const todoAPI = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`/api/todos/${id}/`, {
+    const response = await fetch(`/api/todos/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(todoData),
@@ -117,7 +117,7 @@ export const todoAPI = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`/api/todos/${id}/`, {
+    const response = await fetch(`/api/todos/${id}`, {
       method: 'DELETE',
       headers: headers,
     });
@@ -135,7 +135,7 @@ export const todoAPI = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`/api/todos/${id}/toggle/`, {
+    const response = await fetch(`/api/todos/${id}/toggle`, {
       method: 'PATCH',
       headers: headers,
     });

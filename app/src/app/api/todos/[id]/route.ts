@@ -35,9 +35,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (with trailing slash to avoid redirect)
+    // Forward the request to the backend's todos endpoint (without trailing slash to match backend expectation)
     // Handle redirects manually to preserve auth headers
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(todoData),
@@ -115,9 +115,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (with trailing slash to avoid redirect)
+    // Forward the request to the backend's todos endpoint (without trailing slash to match backend expectation)
     // Handle redirects manually to preserve auth headers
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'DELETE',
       headers: headers,
       redirect: 'manual'
@@ -193,15 +193,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos toggle endpoint (with trailing slash to avoid redirect)
+    // Forward the request to the backend's todos toggle endpoint (without trailing slash to match backend expectation)
     // Handle redirects manually to preserve auth headers
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle/`, {
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle`, {
       method: 'PATCH',
       headers: headers,
       redirect: 'manual'
     });
 
     // If there's a redirect, handle it manually to preserve auth headers ....
+    
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('Location');
       if (location) {
