@@ -1,7 +1,7 @@
 // API utility functions for the Todo App
 
 // Use backend API for production, with fallback to mock routes when backend is not available
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8004';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aqsa-iqbal-application-todo.hf.space';
 
 /**
  * Function to make authenticated API requests
