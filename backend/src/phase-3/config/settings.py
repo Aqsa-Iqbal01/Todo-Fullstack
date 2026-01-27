@@ -8,9 +8,9 @@ class Settings:
     """Application settings for the AI chatbot system"""
 
     def __init__(self):
-        # API endpoints
+        # API endpoints - for direct service calls, we can set a default value that won't be used
         self.backend_api_url: str = os.getenv(
-            "BACKEND_API_URL", "http://localhost:8001/api"
+            "BACKEND_API_URL", "direct_service_call"
         )
 
         # Authentication

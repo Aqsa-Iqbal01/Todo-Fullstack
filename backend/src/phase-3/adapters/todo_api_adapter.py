@@ -85,7 +85,9 @@ class TodoAPIAdapter:
                 }
 
             # Get user from database
-            with Session(get_engine()) as session:
+            # Initialize the database engine
+            engine = get_engine()
+            with Session(engine) as session:
                 user = session.exec(select(User).where(User.email == current_user_email)).first()
                 if not user:
                     return {
@@ -113,6 +115,7 @@ class TodoAPIAdapter:
                 }
 
         except Exception as e:
+            print(f"Error in create_todo: {str(e)}")  # Add logging
             return {
                 "success": False,
                 "error": f"Failed to create todo: {str(e)}",
@@ -154,7 +157,9 @@ class TodoAPIAdapter:
                 }
 
             # Get user from database
-            with Session(get_engine()) as session:
+            # Initialize the database engine
+            engine = get_engine()
+            with Session(engine) as session:
                 user = session.exec(select(User).where(User.email == current_user_email)).first()
                 if not user:
                     return {
@@ -168,7 +173,7 @@ class TodoAPIAdapter:
 
                 # Apply status filter if specified
                 if status_filter:
-                    todos = [todo for todo in todos if todo.status.lower() == status_filter.lower()]
+                    todos = [todo for todo in todos if hasattr(todo, 'status') and todo.status.lower() == status_filter.lower()]
 
                 return {
                     "success": True,
@@ -177,6 +182,7 @@ class TodoAPIAdapter:
                 }
 
         except Exception as e:
+            print(f"Error in list_todos: {str(e)}")  # Add logging
             return {
                 "success": False,
                 "error": f"Failed to retrieve todos: {str(e)}",
@@ -242,7 +248,9 @@ class TodoAPIAdapter:
                 }
 
             # Get user from database
-            with Session(get_engine()) as session:
+            # Initialize the database engine
+            engine = get_engine()
+            with Session(engine) as session:
                 user = session.exec(select(User).where(User.email == current_user_email)).first()
                 if not user:
                     return {
@@ -280,6 +288,7 @@ class TodoAPIAdapter:
                     }
 
         except Exception as e:
+            print(f"Error in update_todo: {str(e)}")  # Add logging
             return {
                 "success": False,
                 "error": f"Failed to update todo: {str(e)}",
@@ -337,7 +346,9 @@ class TodoAPIAdapter:
                 }
 
             # Get user from database
-            with Session(get_engine()) as session:
+            # Initialize the database engine
+            engine = get_engine()
+            with Session(engine) as session:
                 user = session.exec(select(User).where(User.email == current_user_email)).first()
                 if not user:
                     return {
@@ -362,6 +373,7 @@ class TodoAPIAdapter:
                     }
 
         except Exception as e:
+            print(f"Error in delete_todo: {str(e)}")  # Add logging
             return {
                 "success": False,
                 "error": f"Failed to delete todo: {str(e)}",
@@ -419,7 +431,9 @@ class TodoAPIAdapter:
                 }
 
             # Get user from database
-            with Session(get_engine()) as session:
+            # Initialize the database engine
+            engine = get_engine()
+            with Session(engine) as session:
                 user = session.exec(select(User).where(User.email == current_user_email)).first()
                 if not user:
                     return {
@@ -444,6 +458,7 @@ class TodoAPIAdapter:
                     }
 
         except Exception as e:
+            print(f"Error in toggle_todo_status: {str(e)}")  # Add logging
             return {
                 "success": False,
                 "error": f"Failed to toggle todo status: {str(e)}",
