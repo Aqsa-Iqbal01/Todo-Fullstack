@@ -205,7 +205,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('Location');
       if (location) {
-        // Follow the redirect manually with the same headers
+        
         const redirectResponse = await fetch(location, {
           method: 'PATCH',
           headers: headers

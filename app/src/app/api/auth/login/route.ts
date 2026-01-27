@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       redirect: 'manual'
     });
 
-    // If there's a redirect, handle it manually
+  
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('Location');
       if (location) {
