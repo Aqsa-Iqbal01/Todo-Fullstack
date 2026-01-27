@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       redirect: 'manual'
     });
 
-    // If there's a redirect, handle it manually to preserve auth headers
+    // If there's a redirect, handle it manually to preserve auth headers....
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('Location');
       if (location) {
