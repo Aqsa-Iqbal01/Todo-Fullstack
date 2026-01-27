@@ -32,12 +32,17 @@ export const authAPI = {
   logout: async () => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/auth/logout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
     });
     return response;
   },
@@ -48,12 +53,17 @@ export const todoAPI = {
   getTodos: async () => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/todos', {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
     });
     return response;
   },
@@ -61,12 +71,17 @@ export const todoAPI = {
   createTodo: async (todoData: any) => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/todos', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
       body: JSON.stringify(todoData),
     });
     return response;
@@ -75,12 +90,17 @@ export const todoAPI = {
   updateTodo: async (id: string, todoData: any) => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`/api/todos/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
       body: JSON.stringify(todoData),
     });
     return response;
@@ -89,12 +109,17 @@ export const todoAPI = {
   deleteTodo: async (id: string) => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`/api/todos/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
     });
     return response;
   },
@@ -102,12 +127,17 @@ export const todoAPI = {
   toggleTodo: async (id: string) => {
     // Use local API route to avoid mixed content issues
     const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`/api/todos/${id}/toggle`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers,
     });
     return response;
   },

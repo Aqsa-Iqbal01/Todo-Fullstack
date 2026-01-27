@@ -4,15 +4,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     // Extract the token from the Authorization header
     const authHeader = req.headers.get('authorization');
-    let authToken = '';
+    let authToken = null;
+
     if (authHeader) {
       // Handle different possible formats: 'Bearer token', 'bearer token', 'token'
       const header = authHeader.trim();
       if (header.toLowerCase().startsWith('bearer ')) {
         authToken = header.substring(7).trim(); // Remove 'Bearer ' prefix
-      } else if (header.toLowerCase() === 'bearer') {
-        authToken = ''; // Just the word bearer, no token
-      } else {
+      } else if (header.toLowerCase() !== 'bearer' && header.trim() !== '') {
         authToken = header; // Assume it's just the token
       }
     }
@@ -26,13 +25,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Extract the ID from the URL
     const { id } = params;
 
+    // Prepare headers for the backend request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authorization header only if token exists
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
     // Forward the request to the backend's todos endpoint
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,  // Pass the auth token to the backend
-      },
+      headers: headers,
       body: JSON.stringify(todoData)
     });
 
@@ -65,15 +71,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     // Extract the token from the Authorization header
     const authHeader = req.headers.get('authorization');
-    let authToken = '';
+    let authToken = null;
+
     if (authHeader) {
       // Handle different possible formats: 'Bearer token', 'bearer token', 'token'
       const header = authHeader.trim();
       if (header.toLowerCase().startsWith('bearer ')) {
         authToken = header.substring(7).trim(); // Remove 'Bearer ' prefix
-      } else if (header.toLowerCase() === 'bearer') {
-        authToken = ''; // Just the word bearer, no token
-      } else {
+      } else if (header.toLowerCase() !== 'bearer' && header.trim() !== '') {
         authToken = header; // Assume it's just the token
       }
     }
@@ -84,13 +89,20 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     // Extract the ID from the URL
     const { id } = params;
 
+    // Prepare headers for the backend request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authorization header only if token exists
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
     // Forward the request to the backend's todos endpoint
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,  // Pass the auth token to the backend
-      }
+      headers: headers
     });
 
     if (!response.ok) {
@@ -122,15 +134,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   try {
     // Extract the token from the Authorization header
     const authHeader = req.headers.get('authorization');
-    let authToken = '';
+    let authToken = null;
+
     if (authHeader) {
       // Handle different possible formats: 'Bearer token', 'bearer token', 'token'
       const header = authHeader.trim();
       if (header.toLowerCase().startsWith('bearer ')) {
         authToken = header.substring(7).trim(); // Remove 'Bearer ' prefix
-      } else if (header.toLowerCase() === 'bearer') {
-        authToken = ''; // Just the word bearer, no token
-      } else {
+      } else if (header.toLowerCase() !== 'bearer' && header.trim() !== '') {
         authToken = header; // Assume it's just the token
       }
     }
@@ -141,13 +152,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Extract the ID from the URL
     const { id } = params;
 
+    // Prepare headers for the backend request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authorization header only if token exists
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
     // Forward the request to the backend's todos toggle endpoint
     const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,  // Pass the auth token to the backend
-      }
+      headers: headers
     });
 
     if (!response.ok) {
