@@ -1,6 +1,6 @@
 // API utility functions for the Todo App
 
-// All API calls go through local routes to avoid mixed content issues
+// All API calls go through local routes to avoid issues
 // The local API routes will proxy requests to the backend
 
 // Auth API functions
@@ -114,7 +114,7 @@ export const todoAPI = {
     };
 
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${token}`;      
     }
 
     const response = await fetch(`/api/todos/${id}/`, {
@@ -142,3 +142,6 @@ export const todoAPI = {
     return response;
   },
 }; 
+
+
+// add
