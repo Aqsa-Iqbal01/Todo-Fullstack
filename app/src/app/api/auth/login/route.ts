@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
-    // Get the backend API URL from environment variable
+    
     const BACKEND_API_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aqsa-iqbal-application-todo.hf.space';
 
     // Forward the request to the backend's login endpoint
