@@ -163,7 +163,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Extract the token from the Authorization header
+    // Extract the token from the Authorization header ....
     const authHeader = req.headers.get('authorization');
     let authToken = null;
 
