@@ -35,8 +35,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (with trailing slash to match backend's final expectation)
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
+    // Forward the request to the backend's todos endpoint (without trailing slash to match backend's redirect target)
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(todoData)
@@ -99,8 +99,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (with trailing slash to match backend's final expectation)
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/`, {
+    // Forward the request to the backend's todos endpoint (without trailing slash to match backend's redirect target)
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}`, {
       method: 'DELETE',
       headers: headers
     });
@@ -162,8 +162,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos toggle endpoint (with trailing slash to match backend's final expectation)
-    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle/`, {
+    // Forward the request to the backend's todos toggle endpoint (without trailing slash to match backend's redirect target)
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/${id}/toggle`, {
       method: 'PATCH',
       headers: headers
     });
