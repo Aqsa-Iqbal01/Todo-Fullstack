@@ -29,9 +29,9 @@ export async function GET(req: NextRequest) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (without trailing slash)
+    // Forward the request to the backend's todos endpoint (with trailing slash to avoid redirect)
     // Handle redirects manually to preserve auth headers
-    const response = await fetch(`${BACKEND_API_URL}/api/todos`, {
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/`, {
       method: 'GET',
       headers: headers,
       redirect: 'manual'
@@ -107,9 +107,9 @@ export async function POST(req: NextRequest) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    // Forward the request to the backend's todos endpoint (without trailing slash)
+    // Forward the request to the backend's todos endpoint (with trailing slash to avoid redirect)
     // Ensure redirect responses also preserve authentication
-    const response = await fetch(`${BACKEND_API_URL}/api/todos`, {
+    const response = await fetch(`${BACKEND_API_URL}/api/todos/`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(todoData),
