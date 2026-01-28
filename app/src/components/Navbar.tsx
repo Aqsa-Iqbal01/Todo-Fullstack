@@ -8,6 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -65,22 +66,40 @@ const Navbar: React.FC = () => {
               <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">Todo<span className="font-light text-gray-700 dark:text-gray-200 opacity-90 dark:opacity-100">Pro</span></span>
             </div>
 
-            {/* Navigation Links */}
-            <div className="ml-10 flex space-x-8">
+            {/* Desktop Navigation Links - Hidden on Mobile */}
+            <div className="hidden md:flex ml-10 space-x-8">
               <Link href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors duration-200 font-medium">
                 Dashboard
               </Link>
-              <Link href="/chatbotPage
-              
-              
-              
-              " className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors duration-200 font-medium">
+              <Link href="/chatbotPage" className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors duration-200 font-medium">
                 AI Assistant
               </Link>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-300">
+
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center space-x-4">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+              aria-expanded={isMenuOpen}
+              aria-label="Toggle navigation menu"
+            >
+              {isMenuOpen ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Desktop Right Side Items - Hidden on Mobile */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="text-sm text-gray-600 dark:text-gray-300">
               <span className="inline-flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -91,7 +110,7 @@ const Navbar: React.FC = () => {
 
             {/* Welcome Message */}
             {userEmail && (
-              <div className="hidden md:block text-right">
+              <div className="text-right">
                 <div className="text-xs text-gray-700 dark:text-gray-200 font-medium truncate max-w-[120px]">{userEmail}</div>
                 <div className="text-[0.6rem] text-gray-500 dark:text-gray-400">Welcome!</div>
               </div>
@@ -125,6 +144,76 @@ const Navbar: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu - Shown when isMenuOpen is true */}
+        {isMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg shadow-lg mt-2">
+              <Link
+                href="/dashboard"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/chatbotPage"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                AI Assistant
+              </Link>
+
+              {/* Mobile User Info and Actions */}
+              <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                {userEmail && (
+                  <div className="flex items-center px-3 mb-3">
+                    <div className="text-sm">
+                      <div className="font-medium text-gray-700 dark:text-gray-200 truncate max-w-[120px]">{userEmail}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Welcome!</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center px-3 mb-3">
+                  <div className="text-sm text-gray-600 dark:text-gray-300 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Secured
+                  </div>
+                </div>
+
+                <button
+                  onClick={toggleTheme}
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg mb-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {theme === 'light' ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    )}
+                  </svg>
+                  Toggle Theme
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
